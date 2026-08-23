@@ -240,6 +240,16 @@
     position: relative;
     opacity: 0.55;
     transition: opacity 0.2s ease, color 0.2s ease;
+    animation: idle-flicker 7s ease-in-out infinite;
+  }
+
+  @keyframes idle-flicker{
+    0%, 88%, 100%{ opacity: 0.55; color: var(--text-dim); }
+    90%{ opacity: 0.15; }
+    91%{ opacity: 0.7; color: var(--accent); }
+    92%{ opacity: 0.2; }
+    93%, 96%{ opacity: 0.8; color: var(--accent); }
+    94%{ opacity: 0.3; }
   }
 
   .secret-btn:hover{
@@ -290,6 +300,7 @@
   }
 
   @media (prefers-reduced-motion: reduce){
+    .secret-btn{ animation: none; }
     .secret-btn:hover{ animation: none; }
     .secret-btn:hover::before, .secret-btn:hover::after{ animation: none; }
   }
