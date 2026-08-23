@@ -220,6 +220,79 @@
   @media (prefers-reduced-motion: reduce){
     .cursor, .status-line .pulse{ animation: none; }
   }
+
+  /* secret glitch button */
+  .secret-wrap{
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+
+  .secret-btn{
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    position: relative;
+    opacity: 0.55;
+    transition: opacity 0.2s ease, color 0.2s ease;
+  }
+
+  .secret-btn:hover{
+    opacity: 1;
+    color: var(--accent);
+    animation: glitch 0.35s steps(2, jump-none) infinite;
+  }
+
+  .secret-btn:hover::before,
+  .secret-btn:hover::after{
+    content: attr(data-text);
+    position: absolute;
+    left: 0.6rem;
+    top: 0.4rem;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .secret-btn:hover::before{
+    color: var(--accent-2);
+    clip-path: inset(0 0 55% 0);
+    animation: glitch-top 0.4s steps(2, jump-none) infinite;
+  }
+
+  .secret-btn:hover::after{
+    color: #ff5f9e;
+    clip-path: inset(55% 0 0 0);
+    animation: glitch-bottom 0.4s steps(2, jump-none) infinite reverse;
+  }
+
+  @keyframes glitch{
+    0%{ transform: translate(0,0); }
+    20%{ transform: translate(-1px,1px); }
+    40%{ transform: translate(1px,-1px); }
+    60%{ transform: translate(-1px,-1px); }
+    80%{ transform: translate(1px,1px); }
+    100%{ transform: translate(0,0); }
+  }
+  @keyframes glitch-top{
+    0%{ transform: translate(0,0); }
+    50%{ transform: translate(-2px,0); }
+    100%{ transform: translate(2px,0); }
+  }
+  @keyframes glitch-bottom{
+    0%{ transform: translate(0,0); }
+    50%{ transform: translate(2px,0); }
+    100%{ transform: translate(-2px,0); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .secret-btn:hover{ animation: none; }
+    .secret-btn:hover::before, .secret-btn:hover::after{ animation: none; }
+  }
 </style>
 </head>
 <body>
@@ -262,6 +335,10 @@
     </section>
 
   </div>
+</div>
+
+<div class="secret-wrap">
+  <button class="secret-btn" data-text="[ ??? ]" onclick="window.open('https://www.youtube.com/@prod.RottenFoxy', '_blank')">[ ??? ]</button>
 </div>
 
 <footer>© 2026 SyntaxCrash <span class="tag">// keep learning</span></footer>
