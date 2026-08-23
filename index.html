@@ -1,118 +1,270 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SyntaxCrash</title>
+<title>SyntaxCrash // whoami</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body {
-    font-family: 'SyntaxCrash, serif;
-    background: #faf8f5;
-    color: #2b2b2b;
-    line-height: 1.6;
+  :root{
+    --bg: #0a0e14;
+    --panel: #10151d;
+    --border: #1e2a35;
+    --text: #c9d3dc;
+    --text-dim: #5b6b7a;
+    --accent: #6fe3a1;
+    --accent-2: #ffb454;
+    --accent-soft: rgba(111,227,161,0.12);
   }
 
-  header {
-    padding: 4rem 2rem 2rem;
-    max-width: 700px;
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    padding: 4vh 1.5rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* subtle scanline / grid atmosphere */
+  body::before{
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(111,227,161,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(111,227,161,0.035) 1px, transparent 1px);
+    background-size: 42px 42px;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 90%);
+  }
+
+  .terminal{
+    max-width: 680px;
     margin: 0 auto;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 30px 80px -30px rgba(0,0,0,0.6), 0 0 0 1px rgba(111,227,161,0.03);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
   }
 
-  h1 {
-    font-size: 2.5rem;
-    font-weight: normal;
-    letter-spacing: -0.5px;
-  }
-
-  .subtitle {
-    font-family: Arial, sans-serif;
-    font-size: 0.95rem;
-    color: #777;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-top: 0.5rem;
-  }
-
-  main {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 0 2rem 4rem;
-  }
-
-  section {
-    margin-bottom: 3rem;
-  }
-
-  h2 {
-    font-family: Arial, sans-serif;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #999;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.5rem;
-  }
-
-  p {
-    font-size: 1.05rem;
-  }
-
-  .links {
+  .title-bar{
     display: flex;
-    gap: 1.5rem;
-    font-family: Arial, sans-serif;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    background: #0d1219;
+    border-bottom: 1px solid var(--border);
   }
 
-  .links a {
-    color: #2b2b2b;
+  .dot{ width: 11px; height: 11px; border-radius: 50%; }
+  .dot.red{ background: #ff5f56; }
+  .dot.yellow{ background: #ffbd2e; }
+  .dot.green{ background: #27c93f; }
+
+  .title-bar span{
+    margin-left: auto;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  .screen{
+    padding: 2.25rem 2rem 2.5rem;
+  }
+
+  .prompt{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 0.35rem;
+  }
+
+  .prompt .user{ color: var(--accent); }
+  .prompt .path{ color: #6ba3d6; }
+  .prompt .cmd{ color: var(--text); }
+
+  .ascii-name{
+    color: var(--accent);
+    font-size: clamp(1.5rem, 6vw, 2.1rem);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 0.75rem 0 0.15rem;
+    text-shadow: 0 0 18px rgba(111,227,161,0.35);
+  }
+
+  .cursor{
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    background: var(--accent);
+    vertical-align: -0.15em;
+    margin-left: 4px;
+    animation: blink 1s steps(1) infinite;
+    box-shadow: 0 0 10px rgba(111,227,161,0.6);
+  }
+
+  @keyframes blink{ 50% { opacity: 0; } }
+
+  .handle{
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 2.25rem;
+  }
+  .handle .alias{ color: var(--accent-2); }
+
+  section{ margin-bottom: 2rem; }
+  section:last-of-type{ margin-bottom: 0; }
+
+  .field{
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.7rem;
+  }
+  .field::before{ content: "// "; color: var(--border); }
+
+  p.output{
+    font-size: 0.98rem;
+    line-height: 1.75;
+    color: var(--text);
+    padding-left: 1rem;
+    border-left: 2px solid var(--border);
+  }
+
+  .status-line{
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-left: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .status-line .pulse{
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity: 1; transform: scale(1); }
+    50%{ opacity: 0.4; transform: scale(0.75); }
+  }
+
+  .links{
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding-left: 1rem;
+  }
+
+  .links a{
+    color: var(--text);
     text-decoration: none;
-    border-bottom: 1px solid #2b2b2b;
-    padding-bottom: 2px;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: fit-content;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
   }
 
-  .links a:hover {
-    color: #b5622e;
-    border-color: #b5622e;
+  .links a .arrow{
+    color: var(--accent);
+    transition: transform 0.2s ease;
   }
 
-  footer {
+  .links a:hover{
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateX(3px);
+  }
+  .links a:hover .arrow{ transform: translateX(3px); }
+
+  .links a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  footer{
     text-align: center;
-    font-family: Arial, sans-serif;
-    font-size: 0.8rem;
-    color: #aaa;
-    padding: 2rem;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    padding: 2rem 1rem 0;
+    letter-spacing: 0.5px;
+  }
+  footer .tag{ color: var(--accent-2); }
+
+  @media (max-width: 520px){
+    .screen{ padding: 1.75rem 1.25rem 2rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .cursor, .status-line .pulse{ animation: none; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>SyntaxCrash</h1>
-  <div class="subtitle">Je suis en debut de cybersécurité</div>
-</header>
+<div class="terminal">
+  <div class="title-bar">
+    <span class="dot red"></span>
+    <span class="dot yellow"></span>
+    <span class="dot green"></span>
+    <span>guest@syntaxcrash: ~</span>
+  </div>
 
-<main>
-  <section>
-    <h2>À propos</h2>
-    <p>Je suis SyntaxCrash aka Shad0wza, j’ai 15 ans. Je suis au lycée premiere année en cybersécurité et je souhaite un jour de devenir ingénieur.</p>
-  </section>
+  <div class="screen">
 
-  <section>
-    <h2>Contact</h2>
-    <div class="links">
-      <a href="mailto:Shad0wza@protonmail.com">Email</a>
-      <a href="https://github.com/SyntaxCrash">GitHub</a>
+    <div class="prompt">
+      <span class="user">guest@syntaxcrash</span><span>:</span><span class="path">~</span><span class="cmd">$ whoami</span>
     </div>
-  </section>
-</main>
+    <h1 class="ascii-name">SyntaxCrash<span class="cursor"></span></h1>
+    <div class="handle">alias: <span class="alias">Shad0wza</span></div>
 
-<footer>
-  © 2026 SyntaxCrash
-</footer>
+    <section>
+      <div class="field">à propos</div>
+      <p class="output">Je suis SyntaxCrash aka Shad0wza, j'ai 15 ans. Je suis au lycée en première année en cybersécurité et je souhaite un jour devenir ingénieur.</p>
+    </section>
+
+    <section>
+      <div class="field">status</div>
+      <div class="status-line">
+        <span class="pulse"></span>
+        <span>en cours d'apprentissage — disponible pour échanger</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="field">contact</div>
+      <div class="links">
+        <a href="mailto:Shad0wza@protonmail.com"><span class="arrow">›</span> email · Shad0wza@protonmail.com</a>
+        <a href="https://github.com/SyntaxCrash" target="_blank" rel="noopener"><span class="arrow">›</span> github · /SyntaxCrash</a>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<footer>© 2026 SyntaxCrash <span class="tag">// keep learning</span></footer>
 
 </body>
 </html>
