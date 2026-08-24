@@ -429,6 +429,26 @@
   }
 
   .modal-inputline input::placeholder{ color: var(--text-dim); }
+
+  .dpad-btn{
+    background: #0d1219;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  .dpad-btn:active{
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
 </style>
 </head>
 <body>
@@ -493,6 +513,20 @@
       <div class="modal-log" id="modalLog">
         <div class="line">Welcome. Type <span class="ok">help</span> to see what you can do here.</div>
       </div>
+      <canvas id="snakeCanvas" width="240" height="240" style="display:none; margin: 0 auto 0.75rem; background:#0d1219; border:1px solid var(--border); border-radius:4px;"></canvas>
+      <div id="snakeControls" style="display:none; justify-content:center; margin-bottom:0.75rem;">
+        <div style="display:grid; grid-template-columns: repeat(3, 38px); grid-template-rows: repeat(3, 38px); gap:4px;">
+          <div></div>
+          <button class="dpad-btn" data-dir="up">▲</button>
+          <div></div>
+          <button class="dpad-btn" data-dir="left">◀</button>
+          <div></div>
+          <button class="dpad-btn" data-dir="right">▶</button>
+          <div></div>
+          <button class="dpad-btn" data-dir="down">▼</button>
+          <div></div>
+        </div>
+      </div>
       <div class="modal-inputline">
         <span class="sym">$</span>
         <input type="text" id="modalInput" placeholder="type a command..." autocomplete="off" spellcheck="false">
@@ -520,6 +554,7 @@
   }
 
   function closeSecretTerminal(){
+    if (gameActive) endSnake();
     modal.classList.remove('open');
     setTimeout(() => { modal.style.display = 'none'; }, 250);
   }
@@ -532,6 +567,87 @@
     log.scrollTop = log.scrollHeight;
   }
 
+  const snakeCanvas = document.getElementById('snakeCanvas');
+  const snakeControls = document.getElementById('snakeControls');
+  const sctx = snakeCanvas.getContext('2d');
+  const cell = 12;
+  const cols = snakeCanvas.width / cell;
+  const rows = snakeCanvas.height / cell;
+  let snakeBody, snakeDir, snakeNextDir, food, score, gameInterval, gameActive = false;
+
+  function placeFood(){
+    food = { x: Math.floor(Math.random() * cols), y: Math.floor(Math.random() * rows) };
+  }
+
+  function drawSnake(){
+    sctx.fillStyle = '#0d1219';
+    sctx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+    sctx.fillStyle = '#6fe3a1';
+    snakeBody.forEach(s => sctx.fillRect(s.x * cell, s.y * cell, cell - 1, cell - 1));
+    sctx.fillStyle = '#ffb454';
+    sctx.fillRect(food.x * cell, food.y * cell, cell - 1, cell - 1);
+  }
+
+  function stepSnake(){
+    snakeDir = snakeNextDir;
+    const head = { x: snakeBody[0].x + snakeDir.x, y: snakeBody[0].y + snakeDir.y };
+    const hitWall = head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows;
+    const hitSelf = snakeBody.some(s => s.x === head.x && s.y === head.y);
+    if (hitWall || hitSelf){ endSnake(); return; }
+    snakeBody.unshift(head);
+    if (head.x === food.x && head.y === food.y){ score++; placeFood(); } else { snakeBody.pop(); }
+    drawSnake();
+  }
+
+  function startSnake(){
+    gameActive = true;
+    snakeCanvas.style.display = 'block';
+    snakeControls.style.display = 'flex';
+    input.disabled = true;
+    snakeBody = [{ x: 5, y: 5 }];
+    snakeDir = { x: 1, y: 0 };
+    snakeNextDir = snakeDir;
+    score = 0;
+    placeFood();
+    clearInterval(gameInterval);
+    gameInterval = setInterval(stepSnake, 150);
+    drawSnake();
+    addLine('snake started — arrow keys or on-screen pad, ESC to quit', 'ok');
+  }
+
+  function endSnake(){
+    clearInterval(gameInterval);
+    gameActive = false;
+    snakeCanvas.style.display = 'none';
+    snakeControls.style.display = 'none';
+    input.disabled = false;
+    addLine('game over — score: ' + score, 'err');
+    input.focus();
+  }
+
+  function setSnakeDir(dirName){
+    if (!gameActive) return;
+    if (dirName === 'up' && snakeDir.y === 0) snakeNextDir = { x: 0, y: -1 };
+    if (dirName === 'down' && snakeDir.y === 0) snakeNextDir = { x: 0, y: 1 };
+    if (dirName === 'left' && snakeDir.x === 0) snakeNextDir = { x: -1, y: 0 };
+    if (dirName === 'right' && snakeDir.x === 0) snakeNextDir = { x: 1, y: 0 };
+  }
+
+  document.querySelectorAll('.dpad-btn').forEach(btn => {
+    btn.addEventListener('click', () => setSnakeDir(btn.dataset.dir));
+    btn.addEventListener('touchstart', (e) => { e.preventDefault(); setSnakeDir(btn.dataset.dir); }, { passive: false });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!gameActive) return;
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+    if (e.key === 'ArrowUp' && snakeDir.y === 0) snakeNextDir = { x: 0, y: -1 };
+    if (e.key === 'ArrowDown' && snakeDir.y === 0) snakeNextDir = { x: 0, y: 1 };
+    if (e.key === 'ArrowLeft' && snakeDir.x === 0) snakeNextDir = { x: -1, y: 0 };
+    if (e.key === 'ArrowRight' && snakeDir.x === 0) snakeNextDir = { x: 1, y: 0 };
+    if (e.key === 'Escape'){ endSnake(); e.stopPropagation(); }
+  });
+
   input.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     const raw = input.value.trim();
@@ -540,9 +656,11 @@
     const cmd = raw.toLowerCase();
 
     if (cmd === 'help'){
-      addLine('available commands: music, short, clear', 'ok');
+      addLine('available commands: music, short, snake, clear', 'ok');
     } else if (cmd === 'clear'){
       log.innerHTML = '';
+    } else if (cmd === 'snake'){
+      startSnake();
     } else if (commands[cmd]){
       addLine(commands[cmd].msg, 'ok');
       window.open(commands[cmd].url, '_blank');
@@ -557,7 +675,7 @@
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeSecretTerminal();
+    if (e.key === 'Escape' && !gameActive) closeSecretTerminal();
   });
 </script>
 
