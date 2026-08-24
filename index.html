@@ -304,6 +304,131 @@
     .secret-btn:hover{ animation: none; }
     .secret-btn:hover::before, .secret-btn:hover::after{ animation: none; }
   }
+
+  /* secret terminal popup */
+  .modal-backdrop{
+    position: fixed;
+    inset: 0;
+    background: rgba(5,7,10,0.75);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .modal-backdrop.open{
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal-terminal{
+    width: 100%;
+    max-width: 520px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 30px 90px -20px rgba(0,0,0,0.75), 0 0 0 1px rgba(111,227,161,0.05);
+    overflow: hidden;
+    transform: scale(0.9) translateY(12px);
+    opacity: 0;
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+  }
+
+  .modal-backdrop.open .modal-terminal{
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    animation: terminal-flicker-in 0.4s ease-out;
+  }
+
+  @keyframes terminal-flicker-in{
+    0%{ filter: brightness(1); }
+    15%{ filter: brightness(2.5); }
+    25%{ filter: brightness(0.8); }
+    40%{ filter: brightness(1.8); }
+    100%{ filter: brightness(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .modal-backdrop, .modal-terminal{ transition: none; animation: none; }
+  }
+
+  .modal-titlebar{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #0d1219;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-titlebar span.label{
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+
+  .modal-close{
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0 0.3rem;
+  }
+  .modal-close:hover{ color: var(--accent-2); }
+
+  .modal-body{
+    padding: 1.25rem 1.25rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .modal-hint{
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .modal-log{
+    max-height: 180px;
+    overflow-y: auto;
+    margin-bottom: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .modal-log .line{ color: var(--text); }
+  .modal-log .line.echo{ color: var(--text-dim); }
+  .modal-log .line.ok{ color: var(--accent); }
+  .modal-log .line.err{ color: #ff5f9e; }
+
+  .modal-inputline{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+  }
+
+  .modal-inputline .sym{ color: var(--accent); }
+
+  .modal-inputline input{
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .modal-inputline input::placeholder{ color: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -349,10 +474,92 @@
 </div>
 
 <div class="secret-wrap">
-  <button class="secret-btn" data-text="[ ??? ]" onclick="window.open('https://www.youtube.com/@prod.RottenFoxy', '_blank')">[ ??? ]</button>
+  <button class="secret-btn" data-text="[ ??? ]" onclick="openSecretTerminal()">[ ??? ]</button>
 </div>
 
 <footer>© 2026 SyntaxCrash <span class="tag">// keep learning</span></footer>
+
+<div class="modal-backdrop" id="secretModal">
+  <div class="modal-terminal">
+    <div class="modal-titlebar">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+      <span class="label">hidden-shell</span>
+      <button class="modal-close" onclick="closeSecretTerminal()">[x]</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-hint">Type a command ("help" for the list)</div>
+      <div class="modal-log" id="modalLog">
+        <div class="line">Welcome. Type <span class="ok">help</span> to see what you can do here.</div>
+      </div>
+      <div class="modal-inputline">
+        <span class="sym">$</span>
+        <input type="text" id="modalInput" placeholder="type a command..." autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const commands = {
+    music: { url: "https://www.youtube.com/@prod.RottenFoxy", msg: "Opening YouTube channel..." },
+    short: { url: "https://www.tiktok.com/@skanl.rrr22", msg: "Opening TikTok..." },
+  };
+
+  const modal = document.getElementById('secretModal');
+  const input = document.getElementById('modalInput');
+  const log = document.getElementById('modalLog');
+
+  function openSecretTerminal(){
+    modal.style.display = 'flex';
+    void modal.offsetWidth;
+    modal.classList.add('open');
+    input.value = '';
+    setTimeout(() => input.focus(), 200);
+  }
+
+  function closeSecretTerminal(){
+    modal.classList.remove('open');
+    setTimeout(() => { modal.style.display = 'none'; }, 250);
+  }
+
+  function addLine(text, cls){
+    const div = document.createElement('div');
+    div.className = 'line' + (cls ? ' ' + cls : '');
+    div.textContent = text;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const raw = input.value.trim();
+    if (!raw) return;
+    addLine('$ ' + raw, 'echo');
+    const cmd = raw.toLowerCase();
+
+    if (cmd === 'help'){
+      addLine('available commands: music, short, clear', 'ok');
+    } else if (cmd === 'clear'){
+      log.innerHTML = '';
+    } else if (commands[cmd]){
+      addLine(commands[cmd].msg, 'ok');
+      window.open(commands[cmd].url, '_blank');
+    } else {
+      addLine('command not found: ' + raw, 'err');
+    }
+    input.value = '';
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeSecretTerminal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSecretTerminal();
+  });
+</script>
 
 </body>
 </html>
