@@ -449,6 +449,37 @@
     background: var(--accent-soft);
     border-color: var(--accent);
   }
+
+  .comments-toggle{
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+    transition: color 0.2s ease;
+  }
+
+  .comments-toggle:hover{ color: var(--accent); }
+
+  .comments-toggle .chevron{
+    color: var(--accent);
+    font-size: 0.85rem;
+    transition: transform 0.25s ease;
+  }
+
+  .comments-toggle.closed .chevron{ transform: rotate(-90deg); }
+
+  #commentsBox{
+    max-height: 2000px;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.25s ease;
+    opacity: 1;
+  }
+
+  #commentsBox.closed{
+    max-height: 0;
+    opacity: 0;
+  }
 </style>
 </head>
 <body>
@@ -491,22 +522,26 @@
     </section>
 
     <section>
-      <div class="field">comments</div>
-      <script src="https://giscus.app/client.js"
-        data-repo="SyntaxCrash/SyntaxCrash.github.io"
-        data-repo-id="R_kgDOUBgR2g"
-        data-category="General"
-        data-category-id="DIC_kwDOUBgR2s4DEFNm"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="noborder_dark"
-        data-lang="fr"
-        crossorigin="anonymous"
-        async>
-      </script>
+      <div class="field comments-toggle" onclick="toggleComments()">
+        comments <span id="commentsChevron" class="chevron">▾</span>
+      </div>
+      <div id="commentsBox">
+        <script src="https://giscus.app/client.js"
+          data-repo="SyntaxCrash/SyntaxCrash.github.io"
+          data-repo-id="R_kgDOUBgR2g"
+          data-category="General"
+          data-category-id="DIC_kwDOUBgR2s4DEFNm"
+          data-mapping="pathname"
+          data-strict="0"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="top"
+          data-theme="noborder_dark"
+          data-lang="fr"
+          crossorigin="anonymous"
+          async>
+        </script>
+      </div>
     </section>
 
   </div>
@@ -656,6 +691,11 @@
     btn.addEventListener('click', () => setSnakeDir(btn.dataset.dir));
     btn.addEventListener('touchstart', (e) => { e.preventDefault(); setSnakeDir(btn.dataset.dir); }, { passive: false });
   });
+
+  function toggleComments(){
+    document.getElementById('commentsBox').classList.toggle('closed');
+    document.querySelector('.comments-toggle').classList.toggle('closed');
+  }
 
   document.addEventListener('keydown', (e) => {
     if (!gameActive) return;
