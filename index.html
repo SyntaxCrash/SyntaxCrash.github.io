@@ -1,742 +1,1471 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SyntaxCrash // whoami</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg: #0a0e14;
-    --panel: #10151d;
-    --border: #1e2a35;
-    --text: #c9d3dc;
-    --text-dim: #5b6b7a;
-    --accent: #6fe3a1;
-    --accent-2: #ffb454;
-    --accent-soft: rgba(111,227,161,0.12);
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  *{ margin:0; padding:0; box-sizing:border-box; }
+  <title>SyntaxCrash // whoami</title>
+  <meta name="description" content="SyntaxCrash aka Shad0wza — cybersecurity, Linux, coding and experiments.">
+  <meta name="theme-color" content="#0a0e14">
 
-  html{ scroll-behavior: smooth; }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
 
-  body{
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    min-height: 100vh;
-    padding: 4vh 1.5rem;
-    position: relative;
-    overflow-x: hidden;
-  }
+  <style>
+    :root {
+      --bg: #070a0f;
+      --panel: #0d1219;
+      --panel-2: #101720;
+      --border: #1d2a35;
+      --border-soft: rgba(111, 227, 161, .08);
 
-  /* subtle scanline / grid atmosphere */
-  body::before{
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(111,227,161,0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(111,227,161,0.035) 1px, transparent 1px);
-    background-size: 42px 42px;
-    pointer-events: none;
-    z-index: 0;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 90%);
-  }
+      --text: #d5dee6;
+      --text-dim: #657583;
 
-  .terminal{
-    max-width: 680px;
-    margin: 0 auto;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 30px 80px -30px rgba(0,0,0,0.6), 0 0 0 1px rgba(111,227,161,0.03);
-    position: relative;
-    z-index: 1;
-    overflow: hidden;
-  }
+      --green: #6fe3a1;
+      --green-soft: rgba(111, 227, 161, .12);
+      --orange: #ffb454;
+      --pink: #ff5f9e;
+      --blue: #6ba3d6;
 
-  .title-bar{
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.85rem 1rem;
-    background: #0d1219;
-    border-bottom: 1px solid var(--border);
-  }
+      --radius: 12px;
+      --shadow:
+        0 30px 90px rgba(0, 0, 0, .55),
+        0 0 0 1px rgba(111, 227, 161, .025);
 
-  .dot{ width: 11px; height: 11px; border-radius: 50%; }
-  .dot.red{ background: #ff5f56; }
-  .dot.yellow{ background: #ffbd2e; }
-  .dot.green{ background: #27c93f; }
+      --font: "JetBrains Mono", monospace;
+    }
 
-  .title-bar span{
-    margin-left: auto;
-    font-size: 0.72rem;
-    color: var(--text-dim);
-    letter-spacing: 0.5px;
-  }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  .screen{
-    padding: 2.25rem 2rem 2.5rem;
-  }
+    html {
+      scroll-behavior: smooth;
+    }
 
-  .prompt{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    margin-bottom: 0.35rem;
-  }
+    body {
+      min-height: 100vh;
+      padding: clamp(1.25rem, 5vh, 4rem) 1rem;
+      overflow-x: hidden;
 
-  .prompt .user{ color: var(--accent); }
-  .prompt .path{ color: #6ba3d6; }
-  .prompt .cmd{ color: var(--text); }
+      background:
+        radial-gradient(
+          circle at 50% -10%,
+          rgba(111, 227, 161, .07),
+          transparent 38%
+        ),
+        var(--bg);
 
-  .ascii-name{
-    color: var(--accent);
-    font-size: clamp(1.5rem, 6vw, 2.1rem);
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin: 0.75rem 0 0.15rem;
-    text-shadow: 0 0 18px rgba(111,227,161,0.35);
-  }
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+    }
 
-  .cursor{
-    display: inline-block;
-    width: 0.55em;
-    height: 1em;
-    background: var(--accent);
-    vertical-align: -0.15em;
-    margin-left: 4px;
-    animation: blink 1s steps(1) infinite;
-    box-shadow: 0 0 10px rgba(111,227,161,0.6);
-  }
+    /* Background grid */
 
-  @keyframes blink{ 50% { opacity: 0; } }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
 
-  .handle{
-    color: var(--text-dim);
-    font-size: 0.85rem;
-    margin-bottom: 2.25rem;
-  }
-  .handle .alias{ color: var(--accent-2); }
+      background-image:
+        linear-gradient(
+          rgba(111, 227, 161, .028) 1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          90deg,
+          rgba(111, 227, 161, .028) 1px,
+          transparent 1px
+        );
 
-  section{ margin-bottom: 2rem; }
-  section:last-of-type{ margin-bottom: 0; }
+      background-size: 42px 42px;
 
-  .field{
-    color: var(--text-dim);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 0.7rem;
-  }
-  .field::before{ content: "// "; color: var(--border); }
+      mask-image:
+        radial-gradient(
+          ellipse 85% 65% at 50% 10%,
+          black 20%,
+          transparent 90%
+        );
+    }
 
-  p.output{
-    font-size: 0.98rem;
-    line-height: 1.75;
-    color: var(--text);
-    padding-left: 1rem;
-    border-left: 2px solid var(--border);
-  }
+    /* Main terminal */
 
-  .status-line{
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding-left: 1rem;
-    font-size: 0.85rem;
-    color: var(--text-dim);
-  }
-  .status-line .pulse{
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 8px var(--accent);
-    animation: pulse 2s ease-in-out infinite;
-    flex-shrink: 0;
-  }
-  @keyframes pulse{
-    0%,100%{ opacity: 1; transform: scale(1); }
-    50%{ opacity: 0.4; transform: scale(0.75); }
-  }
+    .terminal {
+      width: min(100%, 720px);
+      margin-inline: auto;
 
-  .links{
-    display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
-    padding-left: 1rem;
-  }
+      background: rgba(13, 18, 25, .94);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
 
-  .links a{
-    color: var(--text);
-    text-decoration: none;
-    font-size: 0.92rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    width: fit-content;
-    padding: 0.25rem 0;
-    border-bottom: 1px solid transparent;
-    transition: color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
-  }
+      box-shadow: var(--shadow);
 
-  .links a .arrow{
-    color: var(--accent);
-    transition: transform 0.2s ease;
-  }
+      overflow: hidden;
 
-  .links a:hover{
-    color: var(--accent);
-    border-color: var(--accent);
-    transform: translateX(3px);
-  }
-  .links a:hover .arrow{ transform: translateX(3px); }
+      animation: terminal-in .55s cubic-bezier(.22, 1, .36, 1);
+    }
 
-  .links a:focus-visible{
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-    border-radius: 2px;
-  }
+    @keyframes terminal-in {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(.98);
+      }
 
-  footer{
-    text-align: center;
-    font-size: 0.72rem;
-    color: var(--text-dim);
-    padding: 2rem 1rem 0;
-    letter-spacing: 0.5px;
-  }
-  footer .tag{ color: var(--accent-2); }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
 
-  @media (max-width: 520px){
-    .screen{ padding: 1.75rem 1.25rem 2rem; }
-  }
+    /* Window bar */
 
-  @media (prefers-reduced-motion: reduce){
-    .cursor, .status-line .pulse{ animation: none; }
-  }
+    .title-bar,
+    .modal-titlebar {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
 
-  /* secret glitch button */
-  .secret-wrap{
-    display: flex;
-    justify-content: center;
-    margin-top: 1.5rem;
-  }
+      min-height: 48px;
+      padding: .75rem 1rem;
 
-  .secret-btn{
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 1px;
-    cursor: pointer;
-    padding: 0.4rem 0.6rem;
-    position: relative;
-    opacity: 0.55;
-    transition: opacity 0.2s ease, color 0.2s ease;
-    animation: idle-flicker 7s ease-in-out infinite;
-  }
+      background: rgba(8, 12, 17, .8);
+      border-bottom: 1px solid var(--border);
+    }
 
-  @keyframes idle-flicker{
-    0%, 88%, 100%{ opacity: 0.55; color: var(--text-dim); }
-    90%{ opacity: 0.15; }
-    91%{ opacity: 0.7; color: var(--accent); }
-    92%{ opacity: 0.2; }
-    93%, 96%{ opacity: 0.8; color: var(--accent); }
-    94%{ opacity: 0.3; }
-  }
+    .window-dots {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
 
-  .secret-btn:hover{
-    opacity: 1;
-    color: var(--accent);
-    animation: glitch 0.35s steps(2, jump-none) infinite;
-  }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
 
-  .secret-btn:hover::before,
-  .secret-btn:hover::after{
-    content: attr(data-text);
-    position: absolute;
-    left: 0.6rem;
-    top: 0.4rem;
-    width: 100%;
-    overflow: hidden;
-  }
+    .dot.red { background: #ff5f56; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #27c93f; }
 
-  .secret-btn:hover::before{
-    color: var(--accent-2);
-    clip-path: inset(0 0 55% 0);
-    animation: glitch-top 0.4s steps(2, jump-none) infinite;
-  }
+    .window-title {
+      margin-left: auto;
 
-  .secret-btn:hover::after{
-    color: #ff5f9e;
-    clip-path: inset(55% 0 0 0);
-    animation: glitch-bottom 0.4s steps(2, jump-none) infinite reverse;
-  }
+      color: var(--text-dim);
+      font-size: .68rem;
+      letter-spacing: .4px;
+    }
 
-  @keyframes glitch{
-    0%{ transform: translate(0,0); }
-    20%{ transform: translate(-1px,1px); }
-    40%{ transform: translate(1px,-1px); }
-    60%{ transform: translate(-1px,-1px); }
-    80%{ transform: translate(1px,1px); }
-    100%{ transform: translate(0,0); }
-  }
-  @keyframes glitch-top{
-    0%{ transform: translate(0,0); }
-    50%{ transform: translate(-2px,0); }
-    100%{ transform: translate(2px,0); }
-  }
-  @keyframes glitch-bottom{
-    0%{ transform: translate(0,0); }
-    50%{ transform: translate(2px,0); }
-    100%{ transform: translate(-2px,0); }
-  }
+    /* Content */
 
-  @media (prefers-reduced-motion: reduce){
-    .secret-btn{ animation: none; }
-    .secret-btn:hover{ animation: none; }
-    .secret-btn:hover::before, .secret-btn:hover::after{ animation: none; }
-  }
+    .screen {
+      padding: clamp(1.5rem, 5vw, 2.5rem);
+    }
 
-  /* secret terminal popup */
-  .modal-backdrop{
-    position: fixed;
-    inset: 0;
-    background: rgba(5,7,10,0.75);
-    backdrop-filter: blur(4px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    padding: 1.5rem;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
+    .prompt {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
 
-  .modal-backdrop.open{
-    display: flex;
-    opacity: 1;
-  }
+      color: var(--text-dim);
+      font-size: .8rem;
+    }
 
-  .modal-terminal{
-    width: 100%;
-    max-width: 520px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 30px 90px -20px rgba(0,0,0,0.75), 0 0 0 1px rgba(111,227,161,0.05);
-    overflow: hidden;
-    transform: scale(0.9) translateY(12px);
-    opacity: 0;
-    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
-  }
+    .prompt .user {
+      color: var(--green);
+    }
 
-  .modal-backdrop.open .modal-terminal{
-    transform: scale(1) translateY(0);
-    opacity: 1;
-    animation: terminal-flicker-in 0.4s ease-out;
-  }
+    .prompt .path {
+      color: var(--blue);
+    }
 
-  @keyframes terminal-flicker-in{
-    0%{ filter: brightness(1); }
-    15%{ filter: brightness(2.5); }
-    25%{ filter: brightness(0.8); }
-    40%{ filter: brightness(1.8); }
-    100%{ filter: brightness(1); }
-  }
+    .prompt .command {
+      color: var(--text);
+    }
 
-  @media (prefers-reduced-motion: reduce){
-    .modal-backdrop, .modal-terminal{ transition: none; animation: none; }
-  }
+    .ascii-name {
+      margin: .75rem 0 .2rem;
 
-  .modal-titlebar{
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: #0d1219;
-    border-bottom: 1px solid var(--border);
-  }
+      color: var(--green);
+      font-size: clamp(1.8rem, 8vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: 1px;
 
-  .modal-titlebar span.label{
-    margin-left: auto;
-    font-size: 0.7rem;
-    color: var(--text-dim);
-  }
+      text-shadow:
+        0 0 18px rgba(111, 227, 161, .25);
+    }
 
-  .modal-close{
-    margin-left: auto;
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-    cursor: pointer;
-    padding: 0 0.3rem;
-  }
-  .modal-close:hover{ color: var(--accent-2); }
+    .cursor {
+      display: inline-block;
 
-  .modal-body{
-    padding: 1.25rem 1.25rem 1rem;
-    font-size: 0.85rem;
-  }
+      width: .52em;
+      height: 1em;
 
-  .modal-hint{
-    color: var(--text-dim);
-    font-size: 0.78rem;
-    margin-bottom: 0.9rem;
-  }
+      margin-left: 4px;
 
-  .modal-log{
-    max-height: 180px;
-    overflow-y: auto;
-    margin-bottom: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(111, 227, 161, .7);
 
-  .modal-log .line{ color: var(--text); }
-  .modal-log .line.echo{ color: var(--text-dim); }
-  .modal-log .line.ok{ color: var(--accent); }
-  .modal-log .line.err{ color: #ff5f9e; }
+      vertical-align: -.12em;
 
-  .modal-inputline{
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    border-top: 1px solid var(--border);
-    padding-top: 0.75rem;
-  }
+      animation: blink 1s steps(1) infinite;
+    }
 
-  .modal-inputline .sym{ color: var(--accent); }
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
 
-  .modal-inputline input{
-    flex: 1;
-    background: none;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-  }
+    .handle {
+      margin-bottom: 2.5rem;
 
-  .modal-inputline input::placeholder{ color: var(--text-dim); }
+      color: var(--text-dim);
+      font-size: .82rem;
+    }
 
-  .dpad-btn{
-    background: #0d1219;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.95rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    touch-action: manipulation;
-  }
+    .alias {
+      color: var(--orange);
+    }
 
-  .dpad-btn:active{
-    background: var(--accent-soft);
-    border-color: var(--accent);
-  }
+    /* Sections */
 
-  .comments-toggle{
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    user-select: none;
-    transition: color 0.2s ease;
-  }
+    section {
+      margin-bottom: 2rem;
+    }
 
-  .comments-toggle:hover{ color: var(--accent); }
+    section:last-child {
+      margin-bottom: 0;
+    }
 
-  .comments-toggle .chevron{
-    color: var(--accent);
-    font-size: 0.85rem;
-    transition: transform 0.25s ease;
-  }
+    .field {
+      display: flex;
+      align-items: center;
+      gap: .25rem;
 
-  .comments-toggle.closed .chevron{ transform: rotate(-90deg); }
+      margin-bottom: .75rem;
 
-  #commentsBox{
-    max-height: 2000px;
-    overflow: hidden;
-    transition: max-height 0.35s ease, opacity 0.25s ease;
-    opacity: 1;
-  }
+      color: var(--text-dim);
+      font-size: .68rem;
+      font-weight: 600;
 
-  #commentsBox.closed{
-    max-height: 0;
-    opacity: 0;
-  }
-</style>
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .field::before {
+      content: "//";
+      color: var(--border);
+    }
+
+    .output {
+      padding-left: 1rem;
+
+      border-left: 2px solid var(--border);
+
+      color: var(--text);
+      font-size: .93rem;
+      line-height: 1.8;
+    }
+
+    /* Status */
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+
+      padding-left: 1rem;
+
+      color: var(--text-dim);
+      font-size: .8rem;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+
+      border-radius: 50%;
+      background: var(--green);
+
+      box-shadow: 0 0 10px var(--green);
+
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      50% {
+        opacity: .35;
+        transform: scale(.75);
+      }
+    }
+
+    /* Links */
+
+    .links {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+
+      padding-left: 1rem;
+    }
+
+    .links a {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+
+      width: fit-content;
+      padding: .25rem 0;
+
+      color: var(--text);
+      text-decoration: none;
+      font-size: .84rem;
+
+      border-bottom: 1px solid transparent;
+
+      transition:
+        color .2s ease,
+        transform .2s ease,
+        border-color .2s ease;
+    }
+
+    .links a:hover {
+      color: var(--green);
+      border-color: var(--green);
+      transform: translateX(4px);
+    }
+
+    .arrow {
+      color: var(--green);
+    }
+
+    .links a:focus-visible,
+    .secret-btn:focus-visible,
+    .modal-close:focus-visible,
+    .dpad-btn:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 4px;
+    }
+
+    /* Comments */
+
+    .comments-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      cursor: pointer;
+      user-select: none;
+
+      transition: color .2s ease;
+    }
+
+    .comments-toggle:hover {
+      color: var(--green);
+    }
+
+    .chevron {
+      color: var(--green);
+      font-size: .8rem;
+
+      transition: transform .25s ease;
+    }
+
+    .comments-toggle.closed .chevron {
+      transform: rotate(-90deg);
+    }
+
+    #commentsBox {
+      max-height: 2000px;
+
+      overflow: hidden;
+
+      opacity: 1;
+
+      transition:
+        max-height .4s ease,
+        opacity .25s ease;
+    }
+
+    #commentsBox.closed {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    /* Secret button */
+
+    .secret-wrap {
+      display: flex;
+      justify-content: center;
+
+      margin-top: 1.4rem;
+    }
+
+    .secret-btn {
+      position: relative;
+
+      padding: .45rem .7rem;
+
+      background: transparent;
+      border: 0;
+
+      color: var(--text-dim);
+      font-family: var(--font);
+      font-size: .66rem;
+
+      letter-spacing: 1px;
+
+      cursor: pointer;
+      opacity: .5;
+
+      transition:
+        opacity .2s ease,
+        color .2s ease;
+    }
+
+    .secret-btn:hover {
+      color: var(--green);
+      opacity: 1;
+
+      animation: glitch .35s steps(2) infinite;
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      25% { transform: translate(-1px, 1px); }
+      50% { transform: translate(1px, -1px); }
+      75% { transform: translate(-1px, -1px); }
+      100% { transform: translate(0); }
+    }
+
+    /* Footer */
+
+    footer {
+      padding: 1.75rem 1rem 0;
+
+      color: var(--text-dim);
+      font-size: .68rem;
+      text-align: center;
+    }
+
+    footer .tag {
+      color: var(--orange);
+    }
+
+    /* Modal */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+
+      display: none;
+      align-items: center;
+      justify-content: center;
+
+      padding: 1rem;
+
+      background: rgba(3, 5, 8, .78);
+      backdrop-filter: blur(7px);
+
+      opacity: 0;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+      animation: backdrop-in .25s ease forwards;
+    }
+
+    @keyframes backdrop-in {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal-terminal {
+      width: min(100%, 560px);
+
+      overflow: hidden;
+
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+
+      box-shadow:
+        0 40px 100px rgba(0, 0, 0, .75),
+        0 0 40px rgba(111, 227, 161, .04);
+
+      animation: modal-in .3s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    @keyframes modal-in {
+      from {
+        opacity: 0;
+        transform: scale(.94) translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-close {
+      margin-left: .5rem;
+
+      background: transparent;
+      border: 0;
+
+      color: var(--text-dim);
+      font-family: var(--font);
+      font-size: .8rem;
+
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: var(--orange);
+    }
+
+    .modal-body {
+      padding: 1.25rem;
+    }
+
+    .modal-hint {
+      margin-bottom: .8rem;
+
+      color: var(--text-dim);
+      font-size: .72rem;
+    }
+
+    .modal-log {
+      max-height: 190px;
+
+      margin-bottom: .75rem;
+
+      overflow-y: auto;
+
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+
+      scrollbar-width: thin;
+    }
+
+    .line {
+      color: var(--text);
+      font-size: .78rem;
+      overflow-wrap: anywhere;
+    }
+
+    .line.echo {
+      color: var(--text-dim);
+    }
+
+    .line.ok {
+      color: var(--green);
+    }
+
+    .line.err {
+      color: var(--pink);
+    }
+
+    /* Snake */
+
+    #snakeCanvas {
+      display: none;
+
+      width: min(240px, 75vw);
+      height: auto;
+
+      margin: 0 auto .75rem;
+
+      background: #0a0e14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+
+      image-rendering: pixelated;
+    }
+
+    #snakeControls {
+      display: none;
+
+      justify-content: center;
+
+      margin-bottom: .75rem;
+    }
+
+    .dpad {
+      display: grid;
+
+      grid-template-columns: repeat(3, 38px);
+      grid-template-rows: repeat(3, 38px);
+
+      gap: 4px;
+    }
+
+    .dpad-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: #0a0e14;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+
+      color: var(--green);
+      font-family: var(--font);
+      font-size: .9rem;
+
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+
+      transition:
+        background .15s ease,
+        border-color .15s ease;
+    }
+
+    .dpad-btn:active {
+      background: var(--green-soft);
+      border-color: var(--green);
+    }
+
+    /* Input */
+
+    .modal-inputline {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+
+      padding-top: .75rem;
+
+      border-top: 1px solid var(--border);
+    }
+
+    .sym {
+      color: var(--green);
+    }
+
+    .modal-inputline input {
+      flex: 1;
+
+      min-width: 0;
+
+      background: transparent;
+      border: 0;
+      outline: 0;
+
+      color: var(--text);
+      font-family: var(--font);
+      font-size: .8rem;
+    }
+
+    .modal-inputline input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .modal-inputline input:disabled {
+      opacity: .35;
+    }
+
+    /* Mobile */
+
+    @media (max-width: 520px) {
+      body {
+        padding: 1rem .7rem 2rem;
+      }
+
+      .screen {
+        padding: 1.4rem 1.15rem 1.75rem;
+      }
+
+      .title-bar,
+      .modal-titlebar {
+        min-height: 44px;
+        padding: .65rem .8rem;
+      }
+
+      .window-title {
+        font-size: .6rem;
+      }
+
+      .output {
+        font-size: .86rem;
+      }
+
+      .links a {
+        font-size: .76rem;
+        overflow-wrap: anywhere;
+      }
+
+      .modal-body {
+        padding: 1rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="terminal">
-  <div class="title-bar">
-    <span class="dot red"></span>
-    <span class="dot yellow"></span>
-    <span class="dot green"></span>
-    <span>guest@syntaxcrash: ~</span>
-  </div>
+  <main class="terminal" aria-label="SyntaxCrash portfolio">
 
-  <div class="screen">
-
-    <div class="prompt">
-      <span class="user">guest@syntaxcrash</span><span>:</span><span class="path">~</span><span class="cmd">$ whoami</span>
-    </div>
-    <h1 class="ascii-name">SyntaxCrash<span class="cursor"></span></h1>
-    <div class="handle">alias: <span class="alias">Shad0wza</span></div>
-
-    <section>
-      <div class="field">about</div>
-      <p class="output">I'm SyntaxCrash aka Shad0wza, 15 years old. I'm a first-year high school student studying cybersecurity, and my goal is to become a cybersecurity engineer one day.</p>
-    </section>
-
-    <section>
-      <div class="field">status</div>
-      <div class="status-line">
-        <span class="pulse"></span>
-        <span>currently learning — open to connect</span>
+    <header class="title-bar">
+      <div class="window-dots" aria-hidden="true">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
       </div>
-    </section>
 
-    <section>
-      <div class="field">contact</div>
-      <div class="links">
-        <a href="mailto:Shad0wza@protonmail.com"><span class="arrow">›</span> email · Shad0wza@protonmail.com</a>
-        <a href="https://github.com/SyntaxCrash" target="_blank" rel="noopener"><span class="arrow">›</span> github · /SyntaxCrash</a>
+      <span class="window-title">
+        guest@syntaxcrash: ~
+      </span>
+    </header>
+
+    <div class="screen">
+
+      <div class="prompt" aria-label="terminal command">
+        <span class="user">guest@syntaxcrash</span>
+        <span>:</span>
+        <span class="path">~</span>
+        <span class="command">$ whoami</span>
       </div>
-    </section>
 
-    <section>
-      <div class="field comments-toggle closed" onclick="toggleComments()">
-        comments <span id="commentsChevron" class="chevron">▾</span>
+      <h1 class="ascii-name">
+        SyntaxCrash<span class="cursor" aria-hidden="true"></span>
+      </h1>
+
+      <div class="handle">
+        alias: <span class="alias">Shad0wza</span>
       </div>
-      <div id="commentsBox" class="closed">
-        <script src="https://giscus.app/client.js"
-          data-repo="SyntaxCrash/SyntaxCrash.github.io"
-          data-repo-id="R_kgDOUBgR2g"
-          data-category="General"
-          data-category-id="DIC_kwDOUBgR2s4DEFNm"
-          data-mapping="pathname"
-          data-strict="0"
-          data-reactions-enabled="1"
-          data-emit-metadata="0"
-          data-input-position="top"
-          data-theme="noborder_dark"
-          data-lang="fr"
-          crossorigin="anonymous"
-          async>
-        </script>
-      </div>
-    </section>
 
-  </div>
-</div>
+      <section>
+        <div class="field">about</div>
 
-<div class="secret-wrap">
-  <button class="secret-btn" data-text="[ ??? ]" onclick="openSecretTerminal()">[ ??? ]</button>
-</div>
+        <p class="output">
+          I'm SyntaxCrash aka Shad0wza, 15 years old.
+          I'm a first-year high school student studying cybersecurity,
+          and my goal is to become a cybersecurity engineer one day.
+        </p>
+      </section>
 
-<footer>© 2026 SyntaxCrash <span class="tag">// keep learning</span></footer>
+      <section>
+        <div class="field">status</div>
 
-<div class="modal-backdrop" id="secretModal">
-  <div class="modal-terminal">
-    <div class="modal-titlebar">
-      <span class="dot red"></span>
-      <span class="dot yellow"></span>
-      <span class="dot green"></span>
-      <span class="label">hidden-shell</span>
-      <button class="modal-close" onclick="closeSecretTerminal()">[x]</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-hint">Type a command ("help" for the list)</div>
-      <div class="modal-log" id="modalLog">
-        <div class="line">Welcome. Type <span class="ok">help</span> to see what you can do here.</div>
-      </div>
-      <canvas id="snakeCanvas" width="240" height="240" style="display:none; margin: 0 auto 0.75rem; background:#0d1219; border:1px solid var(--border); border-radius:4px;"></canvas>
-      <div id="snakeControls" style="display:none; justify-content:center; margin-bottom:0.75rem;">
-        <div style="display:grid; grid-template-columns: repeat(3, 38px); grid-template-rows: repeat(3, 38px); gap:4px;">
-          <div></div>
-          <button class="dpad-btn" data-dir="up">▲</button>
-          <div></div>
-          <button class="dpad-btn" data-dir="left">◀</button>
-          <div></div>
-          <button class="dpad-btn" data-dir="right">▶</button>
-          <div></div>
-          <button class="dpad-btn" data-dir="down">▼</button>
-          <div></div>
+        <div class="status-line">
+          <span class="pulse" aria-hidden="true"></span>
+          <span>currently learning — open to connect</span>
         </div>
-      </div>
-      <div class="modal-inputline">
-        <span class="sym">$</span>
-        <input type="text" id="modalInput" placeholder="type a command..." autocomplete="off" spellcheck="false">
+      </section>
+
+      <section>
+        <div class="field">contact</div>
+
+        <nav class="links" aria-label="Contact links">
+
+          <a href="mailto:Shad0wza@protonmail.com">
+            <span class="arrow" aria-hidden="true">›</span>
+            email · Shad0wza@protonmail.com
+          </a>
+
+          <a
+            href="https://github.com/SyntaxCrash"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="arrow" aria-hidden="true">›</span>
+            github · /SyntaxCrash
+          </a>
+
+        </nav>
+      </section>
+
+      <section>
+        <div
+          class="field comments-toggle closed"
+          id="commentsToggle"
+          role="button"
+          tabindex="0"
+          aria-expanded="false"
+          aria-controls="commentsBox"
+        >
+          <span>comments</span>
+          <span class="chevron" aria-hidden="true">▾</span>
+        </div>
+
+        <div id="commentsBox" class="closed">
+
+          <script
+            src="https://giscus.app/client.js"
+            data-repo="SyntaxCrash/SyntaxCrash.github.io"
+            data-repo-id="R_kgDOUBgR2g"
+            data-category="General"
+            data-category-id="DIC_kwDOUBgR2s4DEFNm"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="noborder_dark"
+            data-lang="fr"
+            crossorigin="anonymous"
+            async>
+          </script>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Secret easter egg -->
+
+  <div class="secret-wrap">
+    <button
+      class="secret-btn"
+      id="secretButton"
+      type="button"
+      aria-label="Open hidden terminal"
+    >
+      [ ??? ]
+    </button>
+  </div>
+
+  <footer>
+    © 2026 SyntaxCrash
+    <span class="tag">// keep learning</span>
+  </footer>
+
+  <!-- Hidden terminal -->
+
+  <div
+    class="modal-backdrop"
+    id="secretModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="hiddenShellTitle"
+  >
+
+    <div class="modal-terminal">
+
+      <header class="modal-titlebar">
+
+        <div class="window-dots" aria-hidden="true">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+
+        <span class="window-title" id="hiddenShellTitle">
+          hidden-shell
+        </span>
+
+        <button
+          class="modal-close"
+          id="modalClose"
+          type="button"
+          aria-label="Close terminal"
+        >
+          [x]
+        </button>
+
+      </header>
+
+      <div class="modal-body">
+
+        <p class="modal-hint">
+          Type a command — "help" for the list
+        </p>
+
+        <div
+          class="modal-log"
+          id="modalLog"
+          aria-live="polite"
+        >
+          <div class="line">
+            Welcome. Type <span class="ok">help</span>
+            to see what you can do here.
+          </div>
+        </div>
+
+        <canvas
+          id="snakeCanvas"
+          width="240"
+          height="240"
+          aria-label="Snake game"
+        ></canvas>
+
+        <div id="snakeControls">
+          <div class="dpad">
+
+            <span></span>
+
+            <button class="dpad-btn" data-dir="up" type="button">
+              ▲
+            </button>
+
+            <span></span>
+
+            <button class="dpad-btn" data-dir="left" type="button">
+              ◀
+            </button>
+
+            <span></span>
+
+            <button class="dpad-btn" data-dir="right" type="button">
+              ▶
+            </button>
+
+            <span></span>
+
+            <button class="dpad-btn" data-dir="down" type="button">
+              ▼
+            </button>
+
+            <span></span>
+
+          </div>
+        </div>
+
+        <div class="modal-inputline">
+          <span class="sym">$</span>
+
+          <input
+            id="modalInput"
+            type="text"
+            placeholder="type a command..."
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-label="Terminal command"
+          >
+        </div>
+
       </div>
     </div>
   </div>
-</div>
 
-<script>
-  const commands = {
-    music: { url: "https://www.youtube.com/@prod.RottenFoxy", msg: "Opening YouTube channel..." },
-    short: { url: "https://www.tiktok.com/@skanl.rrr22", msg: "Opening TikTok..." },
-  };
+  <script>
+    "use strict";
 
-  const modal = document.getElementById('secretModal');
-  const input = document.getElementById('modalInput');
-  const log = document.getElementById('modalLog');
+    /* =========================
+       CONFIG
+    ========================= */
 
-  function openSecretTerminal(){
-    modal.style.display = 'flex';
-    void modal.offsetWidth;
-    modal.classList.add('open');
-    input.value = '';
-    setTimeout(() => input.focus(), 200);
-  }
+    const COMMANDS = Object.freeze({
+      music: {
+        url: "https://www.youtube.com/@prod.RottenFoxy",
+        message: "Opening YouTube channel..."
+      },
 
-  function closeSecretTerminal(){
-    if (gameActive) endSnake();
-    modal.classList.remove('open');
-    setTimeout(() => { modal.style.display = 'none'; }, 250);
-  }
+      short: {
+        url: "https://www.tiktok.com/@skanl.rrr22",
+        message: "Opening TikTok..."
+      }
+    });
 
-  function addLine(text, cls){
-    const div = document.createElement('div');
-    div.className = 'line' + (cls ? ' ' + cls : '');
-    div.textContent = text;
-    log.appendChild(div);
-    log.scrollTop = log.scrollHeight;
-  }
+    const SNAKE = {
+      cell: 12,
+      speed: 150
+    };
 
-  const snakeCanvas = document.getElementById('snakeCanvas');
-  const snakeControls = document.getElementById('snakeControls');
-  const sctx = snakeCanvas.getContext('2d');
-  const cell = 12;
-  const cols = snakeCanvas.width / cell;
-  const rows = snakeCanvas.height / cell;
-  let snakeBody, snakeDir, snakeNextDir, food, score, gameInterval, gameActive = false;
+    /* =========================
+       DOM
+    ========================= */
 
-  function placeFood(){
-    food = { x: Math.floor(Math.random() * cols), y: Math.floor(Math.random() * rows) };
-  }
+    const modal = document.getElementById("secretModal");
+    const input = document.getElementById("modalInput");
+    const log = document.getElementById("modalLog");
 
-  function drawSnake(){
-    sctx.fillStyle = '#0d1219';
-    sctx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
-    sctx.fillStyle = '#6fe3a1';
-    snakeBody.forEach(s => sctx.fillRect(s.x * cell, s.y * cell, cell - 1, cell - 1));
-    sctx.fillStyle = '#ffb454';
-    sctx.fillRect(food.x * cell, food.y * cell, cell - 1, cell - 1);
-  }
+    const secretButton = document.getElementById("secretButton");
+    const modalClose = document.getElementById("modalClose");
 
-  function stepSnake(){
-    snakeDir = snakeNextDir;
-    const head = { x: snakeBody[0].x + snakeDir.x, y: snakeBody[0].y + snakeDir.y };
-    const hitWall = head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows;
-    const hitSelf = snakeBody.some(s => s.x === head.x && s.y === head.y);
-    if (hitWall || hitSelf){ endSnake(); return; }
-    snakeBody.unshift(head);
-    if (head.x === food.x && head.y === food.y){ score++; placeFood(); } else { snakeBody.pop(); }
-    drawSnake();
-  }
+    const commentsToggle =
+      document.getElementById("commentsToggle");
 
-  function startSnake(){
-    gameActive = true;
-    snakeCanvas.style.display = 'block';
-    snakeControls.style.display = 'flex';
-    input.disabled = true;
-    snakeBody = [{ x: 5, y: 5 }];
-    snakeDir = { x: 1, y: 0 };
-    snakeNextDir = snakeDir;
-    score = 0;
-    placeFood();
-    clearInterval(gameInterval);
-    gameInterval = setInterval(stepSnake, 150);
-    drawSnake();
-    addLine('snake started — arrow keys or on-screen pad, ESC to quit', 'ok');
-  }
+    const commentsBox =
+      document.getElementById("commentsBox");
 
-  function endSnake(){
-    clearInterval(gameInterval);
-    gameActive = false;
-    snakeCanvas.style.display = 'none';
-    snakeControls.style.display = 'none';
-    input.disabled = false;
-    addLine('game over — score: ' + score, 'err');
-    input.focus();
-  }
+    const snakeCanvas =
+      document.getElementById("snakeCanvas");
 
-  function setSnakeDir(dirName){
-    if (!gameActive) return;
-    if (dirName === 'up' && snakeDir.y === 0) snakeNextDir = { x: 0, y: -1 };
-    if (dirName === 'down' && snakeDir.y === 0) snakeNextDir = { x: 0, y: 1 };
-    if (dirName === 'left' && snakeDir.x === 0) snakeNextDir = { x: -1, y: 0 };
-    if (dirName === 'right' && snakeDir.x === 0) snakeNextDir = { x: 1, y: 0 };
-  }
+    const snakeControls =
+      document.getElementById("snakeControls");
 
-  document.querySelectorAll('.dpad-btn').forEach(btn => {
-    btn.addEventListener('click', () => setSnakeDir(btn.dataset.dir));
-    btn.addEventListener('touchstart', (e) => { e.preventDefault(); setSnakeDir(btn.dataset.dir); }, { passive: false });
-  });
+    const ctx =
+      snakeCanvas.getContext("2d");
 
-  function toggleComments(){
-    document.getElementById('commentsBox').classList.toggle('closed');
-    document.querySelector('.comments-toggle').classList.toggle('closed');
-  }
+    /* =========================
+       COMMENTS
+    ========================= */
 
-  document.addEventListener('keydown', (e) => {
-    if (!gameActive) return;
-    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
-    if (e.key === 'ArrowUp' && snakeDir.y === 0) snakeNextDir = { x: 0, y: -1 };
-    if (e.key === 'ArrowDown' && snakeDir.y === 0) snakeNextDir = { x: 0, y: 1 };
-    if (e.key === 'ArrowLeft' && snakeDir.x === 0) snakeNextDir = { x: -1, y: 0 };
-    if (e.key === 'ArrowRight' && snakeDir.x === 0) snakeNextDir = { x: 1, y: 0 };
-    if (e.key === 'Escape'){ endSnake(); e.stopPropagation(); }
-  });
+    function toggleComments() {
+      const closed =
+        commentsBox.classList.toggle("closed");
 
-  input.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter') return;
-    const raw = input.value.trim();
-    if (!raw) return;
-    addLine('$ ' + raw, 'echo');
-    const cmd = raw.toLowerCase();
+      commentsToggle.classList.toggle(
+        "closed",
+        closed
+      );
 
-    if (cmd === 'help'){
-      addLine('available commands: music, short, snake, clear', 'ok');
-    } else if (cmd === 'clear'){
-      log.innerHTML = '';
-    } else if (cmd === 'snake'){
-      startSnake();
-    } else if (commands[cmd]){
-      addLine(commands[cmd].msg, 'ok');
-      window.open(commands[cmd].url, '_blank');
-    } else {
-      addLine('command not found: ' + raw, 'err');
+      commentsToggle.setAttribute(
+        "aria-expanded",
+        String(!closed)
+      );
     }
-    input.value = '';
-  });
 
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeSecretTerminal();
-  });
+    commentsToggle.addEventListener(
+      "click",
+      toggleComments
+    );
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !gameActive) closeSecretTerminal();
-  });
-</script>
+    commentsToggle.addEventListener(
+      "keydown",
+      event => {
+        if (
+          event.key === "Enter" ||
+          event.key === " "
+        ) {
+          event.preventDefault();
+          toggleComments();
+        }
+      }
+    );
+
+    /* =========================
+       SECRET TERMINAL
+    ========================= */
+
+    function openSecretTerminal() {
+      modal.style.display = "flex";
+
+      requestAnimationFrame(() => {
+        modal.classList.add("open");
+      });
+
+      input.value = "";
+
+      setTimeout(() => {
+        input.focus();
+      }, 120);
+    }
+
+    function closeSecretTerminal() {
+      if (gameActive) {
+        endSnake();
+      }
+
+      modal.classList.remove("open");
+
+      setTimeout(() => {
+        modal.style.display = "none";
+      }, 250);
+    }
+
+    secretButton.addEventListener(
+      "click",
+      openSecretTerminal
+    );
+
+    modalClose.addEventListener(
+      "click",
+      closeSecretTerminal
+    );
+
+    modal.addEventListener(
+      "click",
+      event => {
+        if (event.target === modal) {
+          closeSecretTerminal();
+        }
+      }
+    );
+
+    /* =========================
+       TERMINAL LOG
+    ========================= */
+
+    function addLine(text, type = "") {
+      const line =
+        document.createElement("div");
+
+      line.className =
+        `line ${type}`.trim();
+
+      line.textContent = text;
+
+      log.appendChild(line);
+
+      log.scrollTop =
+        log.scrollHeight;
+    }
+
+    /* =========================
+       SNAKE
+    ========================= */
+
+    const cols =
+      snakeCanvas.width / SNAKE.cell;
+
+    const rows =
+      snakeCanvas.height / SNAKE.cell;
+
+    let snakeBody = [];
+    let direction = { x: 1, y: 0 };
+    let nextDirection = { x: 1, y: 0 };
+
+    let food = { x: 0, y: 0 };
+
+    let score = 0;
+    let gameInterval = null;
+    let gameActive = false;
+
+    function placeFood() {
+      let position;
+
+      do {
+        position = {
+          x: Math.floor(Math.random() * cols),
+          y: Math.floor(Math.random() * rows)
+        };
+      } while (
+        snakeBody.some(
+          part =>
+            part.x === position.x &&
+            part.y === position.y
+        )
+      );
+
+      food = position;
+    }
+
+    function drawSnake() {
+      ctx.fillStyle = "#0a0e14";
+
+      ctx.fillRect(
+        0,
+        0,
+        snakeCanvas.width,
+        snakeCanvas.height
+      );
+
+      ctx.fillStyle = "#6fe3a1";
+
+      snakeBody.forEach(
+        ({ x, y }, index) => {
+
+          ctx.globalAlpha =
+            index === 0 ? 1 : .8;
+
+          ctx.fillRect(
+            x * SNAKE.cell,
+            y * SNAKE.cell,
+            SNAKE.cell - 1,
+            SNAKE.cell - 1
+          );
+        }
+      );
+
+      ctx.globalAlpha = 1;
+
+      ctx.fillStyle = "#ffb454";
+
+      ctx.fillRect(
+        food.x * SNAKE.cell,
+        food.y * SNAKE.cell,
+        SNAKE.cell - 1,
+        SNAKE.cell - 1
+      );
+    }
+
+    function stepSnake() {
+      direction = nextDirection;
+
+      const head = {
+        x: snakeBody[0].x + direction.x,
+        y: snakeBody[0].y + direction.y
+      };
+
+      const hitWall =
+        head.x < 0 ||
+        head.x >= cols ||
+        head.y < 0 ||
+        head.y >= rows;
+
+      const hitSelf =
+        snakeBody.some(
+          part =>
+            part.x === head.x &&
+            part.y === head.y
+        );
+
+      if (hitWall || hitSelf) {
+        endSnake();
+        return;
+      }
+
+      snakeBody.unshift(head);
+
+      if (
+        head.x === food.x &&
+        head.y === food.y
+      ) {
+        score++;
+        placeFood();
+      } else {
+        snakeBody.pop();
+      }
+
+      drawSnake();
+    }
+
+    function startSnake() {
+      if (gameActive) return;
+
+      gameActive = true;
+
+      snakeCanvas.style.display = "block";
+      snakeControls.style.display = "flex";
+
+      input.disabled = true;
+
+      snakeBody = [
+        { x: 5, y: 5 }
+      ];
+
+      direction = { x: 1, y: 0 };
+      nextDirection = { x: 1, y: 0 };
+
+      score = 0;
+
+      placeFood();
+      drawSnake();
+
+      clearInterval(gameInterval);
+
+      gameInterval =
+        setInterval(
+          stepSnake,
+          SNAKE.speed
+        );
+
+      addLine(
+        "snake started — arrow keys or touch controls, ESC to quit",
+        "ok"
+      );
+    }
+
+    function endSnake() {
+      clearInterval(gameInterval);
+
+      gameInterval = null;
+      gameActive = false;
+
+      snakeCanvas.style.display = "none";
+      snakeControls.style.display = "none";
+
+      input.disabled = false;
+
+      addLine(
+        `game over — score: ${score}`,
+        "err"
+      );
+
+      input.focus();
+    }
+
+    function setSnakeDirection(name) {
+      if (!gameActive) return;
+
+      const directions = {
+        up: { x: 0, y: -1 },
+        down: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
+        right: { x: 1, y: 0 }
+      };
+
+      const newDirection =
+        directions[name];
+
+      if (!newDirection) return;
+
+      const reverse =
+        newDirection.x === -direction.x &&
+        newDirection.y === -direction.y;
+
+      if (!reverse) {
+        nextDirection =
+          newDirection;
+      }
+    }
+
+    document
+      .querySelectorAll(".dpad-btn")
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+            setSnakeDirection(
+              button.dataset.dir
+            );
+          }
+        );
+      });
+
+    /* =========================
+       KEYBOARD
+    ========================= */
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        if (
+          event.key === "Escape" &&
+          gameActive
+        ) {
+          event.preventDefault();
+          endSnake();
+          return;
+        }
+
+        if (
+          event.key === "Escape" &&
+          modal.classList.contains("open") &&
+          !gameActive
+        ) {
+          closeSecretTerminal();
+          return;
+        }
+
+        if (!gameActive) return;
+
+        const keys = {
+          ArrowUp: "up",
+          ArrowDown: "down",
+          ArrowLeft: "left",
+          ArrowRight: "right"
+        };
+
+        const directionName =
+          keys[event.key];
+
+        if (!directionName) return;
+
+        event.preventDefault();
+
+        setSnakeDirection(
+          directionName
+        );
+      }
+    );
+
+    /* =========================
+       COMMAND SYSTEM
+    ========================= */
+
+    function executeCommand(rawCommand) {
+      const command =
+        rawCommand.trim().toLowerCase();
+
+      if (!command) return;
+
+      addLine(
+        `$ ${rawCommand}`,
+        "echo"
+      );
+
+      switch (command) {
+
+        case "help":
+          addLine(
+            "available commands: help, music, short, snake, clear",
+            "ok"
+          );
+          break;
+
+        case "clear":
+          log.replaceChildren();
+          break;
+
+        case "snake":
+          startSnake();
+          break;
+
+        case "music":
+        case "short": {
+          const selected =
+            COMMANDS[command];
+
+          addLine(
+            selected.message,
+            "ok"
+          );
+
+          window.open(
+            selected.url,
+            "_blank",
+            "noopener,noreferrer"
+          );
+
+          break;
+        }
+
+        default:
+          addLine(
+            `command not found: ${rawCommand}`,
+            "err"
+          );
+      }
+
+      input.value = "";
+    }
+
+    input.addEventListener(
+      "keydown",
+      event => {
+        if (event.key !== "Enter") return;
+
+        executeCommand(
+          input.value
+        );
+      }
+    );
+
+    /* =========================
+       INITIAL STATE
+    ========================= */
+
+    modal.style.display = "none";
+    commentsBox.classList.add("closed");
+    commentsToggle.classList.add("closed");
+  </script>
 
 </body>
 </html>
