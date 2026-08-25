@@ -1,1471 +1,2089 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>SyntaxCrash // whoami</title>
-  <meta name="description" content="SyntaxCrash aka Shad0wza — cybersecurity, Linux, coding and experiments.">
-  <meta name="theme-color" content="#0a0e14">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  >
-
-  <style>
-    :root {
-      --bg: #070a0f;
-      --panel: #0d1219;
-      --panel-2: #101720;
-      --border: #1d2a35;
-      --border-soft: rgba(111, 227, 161, .08);
-
-      --text: #d5dee6;
-      --text-dim: #657583;
-
-      --green: #6fe3a1;
-      --green-soft: rgba(111, 227, 161, .12);
-      --orange: #ffb454;
-      --pink: #ff5f9e;
-      --blue: #6ba3d6;
-
-      --radius: 12px;
-      --shadow:
-        0 30px 90px rgba(0, 0, 0, .55),
-        0 0 0 1px rgba(111, 227, 161, .025);
-
-      --font: "JetBrains Mono", monospace;
-    }
-
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      min-height: 100vh;
-      padding: clamp(1.25rem, 5vh, 4rem) 1rem;
-      overflow-x: hidden;
-
-      background:
-        radial-gradient(
-          circle at 50% -10%,
-          rgba(111, 227, 161, .07),
-          transparent 38%
-        ),
-        var(--bg);
-
-      color: var(--text);
-      font-family: var(--font);
-      line-height: 1.6;
-    }
-
-    /* Background grid */
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-
-      background-image:
-        linear-gradient(
-          rgba(111, 227, 161, .028) 1px,
-          transparent 1px
-        ),
-        linear-gradient(
-          90deg,
-          rgba(111, 227, 161, .028) 1px,
-          transparent 1px
-        );
-
-      background-size: 42px 42px;
-
-      mask-image:
-        radial-gradient(
-          ellipse 85% 65% at 50% 10%,
-          black 20%,
-          transparent 90%
-        );
-    }
-
-    /* Main terminal */
-
-    .terminal {
-      width: min(100%, 720px);
-      margin-inline: auto;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SyntaxCrash // whoami</title>
+
+<meta name="description" content="SyntaxCrash aka Shad0wza — cybersecurity, coding, Linux and experiments.">
+<meta name="theme-color" content="#070a0f">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+:root {
+  --bg: #070a0f;
+  --panel: #0d1219;
+  --panel-light: #101720;
+  --border: #1d2a35;
+
+  --text: #d5dee6;
+  --text-dim: #657583;
+
+  --green: #6fe3a1;
+  --green-soft: rgba(111,227,161,.12);
+
+  --orange: #ffb454;
+  --pink: #ff5f9e;
+  --blue: #6ba3d6;
+
+  --font: "JetBrains Mono", monospace;
+}
+
+/* =====================================================
+   RESET
+===================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  padding: clamp(1rem, 5vh, 4rem) 1rem 2rem;
+
+  overflow-x: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(111,227,161,.08),
+      transparent 40%
+    ),
+    var(--bg);
+
+  color: var(--text);
+  font-family: var(--font);
+}
+
+/* =====================================================
+   BACKGROUND GRID
+===================================================== */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+
+  z-index: -1;
+  pointer-events: none;
+
+  background-image:
+    linear-gradient(
+      rgba(111,227,161,.028) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(111,227,161,.028) 1px,
+      transparent 1px
+    );
+
+  background-size: 42px 42px;
+
+  mask-image:
+    radial-gradient(
+      ellipse 85% 65% at 50% 10%,
+      black 20%,
+      transparent 90%
+    );
+}
 
-      background: rgba(13, 18, 25, .94);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
+/* =====================================================
+   MAIN TERMINAL
+===================================================== */
 
-      box-shadow: var(--shadow);
+.terminal {
+  width: min(100%, 720px);
+  margin: auto;
 
-      overflow: hidden;
+  background: rgba(13,18,25,.96);
 
-      animation: terminal-in .55s cubic-bezier(.22, 1, .36, 1);
-    }
+  border: 1px solid var(--border);
+  border-radius: 12px;
 
-    @keyframes terminal-in {
-      from {
-        opacity: 0;
-        transform: translateY(18px) scale(.98);
-      }
+  overflow: hidden;
 
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
+  box-shadow:
+    0 30px 90px rgba(0,0,0,.55),
+    0 0 0 1px rgba(111,227,161,.025);
 
-    /* Window bar */
+  animation: bootTerminal .6s ease-out;
+}
 
-    .title-bar,
-    .modal-titlebar {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
+@keyframes bootTerminal {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(.98);
+  }
 
-      min-height: 48px;
-      padding: .75rem 1rem;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 
-      background: rgba(8, 12, 17, .8);
-      border-bottom: 1px solid var(--border);
-    }
+/* =====================================================
+   TITLE BAR
+===================================================== */
 
-    .window-dots {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-    }
+.title-bar {
+  display: flex;
+  align-items: center;
 
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
+  min-height: 48px;
+  padding: .75rem 1rem;
 
-    .dot.red { background: #ff5f56; }
-    .dot.yellow { background: #ffbd2e; }
-    .dot.green { background: #27c93f; }
+  background: rgba(8,12,17,.9);
+  border-bottom: 1px solid var(--border);
+}
 
-    .window-title {
-      margin-left: auto;
+.window-dots {
+  display: flex;
+  gap: .5rem;
+}
 
-      color: var(--text-dim);
-      font-size: .68rem;
-      letter-spacing: .4px;
-    }
+.dot {
+  width: 10px;
+  height: 10px;
 
-    /* Content */
+  border-radius: 50%;
+}
 
-    .screen {
-      padding: clamp(1.5rem, 5vw, 2.5rem);
-    }
+.dot.red {
+  background: #ff5f56;
+}
 
-    .prompt {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .4rem;
+.dot.yellow {
+  background: #ffbd2e;
+}
 
-      color: var(--text-dim);
-      font-size: .8rem;
-    }
+.dot.green {
+  background: #27c93f;
+}
 
-    .prompt .user {
-      color: var(--green);
-    }
+.window-title {
+  margin-left: auto;
 
-    .prompt .path {
-      color: var(--blue);
-    }
+  color: var(--text-dim);
+  font-size: .68rem;
+}
 
-    .prompt .command {
-      color: var(--text);
-    }
+/* =====================================================
+   SCREEN
+===================================================== */
 
-    .ascii-name {
-      margin: .75rem 0 .2rem;
+.screen {
+  padding: clamp(1.5rem,5vw,2.5rem);
+}
 
-      color: var(--green);
-      font-size: clamp(1.8rem, 8vw, 2.6rem);
-      font-weight: 700;
-      letter-spacing: 1px;
+/* =====================================================
+   BOOT COMMAND
+===================================================== */
 
-      text-shadow:
-        0 0 18px rgba(111, 227, 161, .25);
-    }
+.prompt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
 
-    .cursor {
-      display: inline-block;
+  color: var(--text-dim);
+  font-size: .8rem;
+}
 
-      width: .52em;
-      height: 1em;
+.prompt .user {
+  color: var(--green);
+}
 
-      margin-left: 4px;
+.prompt .path {
+  color: var(--blue);
+}
 
-      background: var(--green);
-      box-shadow: 0 0 12px rgba(111, 227, 161, .7);
+.prompt .command {
+  color: var(--text);
+}
 
-      vertical-align: -.12em;
+#typedCommand {
+  white-space: pre;
+}
 
-      animation: blink 1s steps(1) infinite;
-    }
+.typing-cursor {
+  display: inline-block;
 
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
+  width: .5em;
+  height: 1em;
 
-    .handle {
-      margin-bottom: 2.5rem;
+  margin-left: 3px;
 
-      color: var(--text-dim);
-      font-size: .82rem;
-    }
+  background: var(--green);
 
-    .alias {
-      color: var(--orange);
-    }
+  vertical-align: -.12em;
 
-    /* Sections */
+  box-shadow: 0 0 10px rgba(111,227,161,.6);
 
-    section {
-      margin-bottom: 2rem;
-    }
+  animation: typingBlink .7s steps(1) infinite;
+}
 
-    section:last-child {
-      margin-bottom: 0;
-    }
+@keyframes typingBlink {
+  50% {
+    opacity: 0;
+  }
+}
 
-    .field {
-      display: flex;
-      align-items: center;
-      gap: .25rem;
+/* =====================================================
+   NAME
+===================================================== */
 
-      margin-bottom: .75rem;
+.ascii-name {
+  display: flex;
+  align-items: center;
 
-      color: var(--text-dim);
-      font-size: .68rem;
-      font-weight: 600;
+  margin: .8rem 0 .2rem;
 
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
+  color: var(--green);
 
-    .field::before {
-      content: "//";
-      color: var(--border);
-    }
+  font-size: clamp(1.8rem,8vw,2.6rem);
+  font-weight: 700;
 
-    .output {
-      padding-left: 1rem;
+  letter-spacing: 1px;
 
-      border-left: 2px solid var(--border);
+  text-shadow:
+    0 0 18px rgba(111,227,161,.3);
 
-      color: var(--text);
-      font-size: .93rem;
-      line-height: 1.8;
-    }
+  opacity: 0;
+  transform: translateY(8px);
 
-    /* Status */
+  transition:
+    opacity .6s ease,
+    transform .6s ease;
+}
 
-    .status-line {
-      display: flex;
-      align-items: center;
-      gap: .65rem;
+.ascii-name.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-      padding-left: 1rem;
+/* =====================================================
+   CURSEUR À CÔTÉ DE SYNTAXCRASH
+===================================================== */
 
-      color: var(--text-dim);
-      font-size: .8rem;
-    }
+.name-cursor {
+  display: inline-block;
 
-    .pulse {
-      width: 8px;
-      height: 8px;
+  width: .5em;
+  height: 1em;
 
-      border-radius: 50%;
-      background: var(--green);
+  margin-left: 5px;
 
-      box-shadow: 0 0 10px var(--green);
+  background: var(--green);
 
-      animation: pulse 2s ease-in-out infinite;
-    }
+  vertical-align: -.12em;
 
-    @keyframes pulse {
-      50% {
-        opacity: .35;
-        transform: scale(.75);
-      }
-    }
+  box-shadow:
+    0 0 10px rgba(111,227,161,.7);
 
-    /* Links */
+  animation:
+    nameCursorBlink .8s steps(1) infinite;
+}
 
-    .links {
-      display: flex;
-      flex-direction: column;
-      gap: .5rem;
+@keyframes nameCursorBlink {
+  50% {
+    opacity: 0;
+  }
+}
 
-      padding-left: 1rem;
-    }
+/* =====================================================
+   HANDLE
+===================================================== */
 
-    .links a {
-      display: inline-flex;
-      align-items: center;
-      gap: .55rem;
+.handle {
+  margin-bottom: 2.5rem;
 
-      width: fit-content;
-      padding: .25rem 0;
+  color: var(--text-dim);
+  font-size: .82rem;
 
-      color: var(--text);
-      text-decoration: none;
-      font-size: .84rem;
+  opacity: 0;
+  transform: translateY(8px);
 
-      border-bottom: 1px solid transparent;
+  transition:
+    opacity .5s ease,
+    transform .5s ease;
+}
 
-      transition:
-        color .2s ease,
-        transform .2s ease,
-        border-color .2s ease;
-    }
+.handle.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-    .links a:hover {
-      color: var(--green);
-      border-color: var(--green);
-      transform: translateX(4px);
-    }
+.alias {
+  color: var(--orange);
+}
 
-    .arrow {
-      color: var(--green);
-    }
+/* =====================================================
+   SECTIONS
+===================================================== */
 
-    .links a:focus-visible,
-    .secret-btn:focus-visible,
-    .modal-close:focus-visible,
-    .dpad-btn:focus-visible {
-      outline: 2px solid var(--green);
-      outline-offset: 4px;
-    }
+.content-section {
+  margin-bottom: 2rem;
 
-    /* Comments */
+  opacity: 0;
+  transform: translateY(12px);
 
-    .comments-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+  transition:
+    opacity .55s ease,
+    transform .55s ease;
+}
 
-      cursor: pointer;
-      user-select: none;
+.content-section.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-      transition: color .2s ease;
-    }
+.field {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
 
-    .comments-toggle:hover {
-      color: var(--green);
-    }
+  margin-bottom: .75rem;
 
-    .chevron {
-      color: var(--green);
-      font-size: .8rem;
+  color: var(--text-dim);
 
-      transition: transform .25s ease;
-    }
+  font-size: .68rem;
+  font-weight: 600;
 
-    .comments-toggle.closed .chevron {
-      transform: rotate(-90deg);
-    }
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
 
-    #commentsBox {
-      max-height: 2000px;
+.field::before {
+  content: "//";
+  color: var(--border);
+}
 
-      overflow: hidden;
+/* =====================================================
+   ABOUT
+===================================================== */
 
-      opacity: 1;
+.output {
+  padding-left: 1rem;
 
-      transition:
-        max-height .4s ease,
-        opacity .25s ease;
-    }
+  border-left: 2px solid var(--border);
 
-    #commentsBox.closed {
-      max-height: 0;
-      opacity: 0;
-    }
+  color: var(--text);
 
-    /* Secret button */
+  font-size: .93rem;
+  line-height: 1.8;
+}
 
-    .secret-wrap {
-      display: flex;
-      justify-content: center;
+/* =====================================================
+   STATUS
+===================================================== */
 
-      margin-top: 1.4rem;
-    }
+.status-line {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
 
-    .secret-btn {
-      position: relative;
+  padding-left: 1rem;
 
-      padding: .45rem .7rem;
+  color: var(--text-dim);
+  font-size: .8rem;
+}
 
-      background: transparent;
-      border: 0;
+.pulse {
+  width: 8px;
+  height: 8px;
 
-      color: var(--text-dim);
-      font-family: var(--font);
-      font-size: .66rem;
+  flex-shrink: 0;
 
-      letter-spacing: 1px;
+  border-radius: 50%;
 
-      cursor: pointer;
-      opacity: .5;
+  background: var(--green);
 
-      transition:
-        opacity .2s ease,
-        color .2s ease;
-    }
+  box-shadow:
+    0 0 10px var(--green);
 
-    .secret-btn:hover {
-      color: var(--green);
-      opacity: 1;
+  animation: pulse 2s ease-in-out infinite;
+}
 
-      animation: glitch .35s steps(2) infinite;
-    }
+@keyframes pulse {
+  50% {
+    opacity: .35;
+    transform: scale(.75);
+  }
+}
 
-    @keyframes glitch {
-      0% { transform: translate(0); }
-      25% { transform: translate(-1px, 1px); }
-      50% { transform: translate(1px, -1px); }
-      75% { transform: translate(-1px, -1px); }
-      100% { transform: translate(0); }
-    }
+/* =====================================================
+   LINKS
+===================================================== */
 
-    /* Footer */
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
 
-    footer {
-      padding: 1.75rem 1rem 0;
+  padding-left: 1rem;
+}
 
-      color: var(--text-dim);
-      font-size: .68rem;
-      text-align: center;
-    }
+.links a {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
 
-    footer .tag {
-      color: var(--orange);
-    }
+  width: fit-content;
 
-    /* Modal */
+  padding: .25rem 0;
 
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
+  color: var(--text);
 
-      display: none;
-      align-items: center;
-      justify-content: center;
+  font-size: .84rem;
+  text-decoration: none;
 
-      padding: 1rem;
+  border-bottom: 1px solid transparent;
 
-      background: rgba(3, 5, 8, .78);
-      backdrop-filter: blur(7px);
+  transition:
+    color .2s ease,
+    transform .2s ease,
+    border-color .2s ease;
+}
 
-      opacity: 0;
-    }
+.links a:hover {
+  color: var(--green);
 
-    .modal-backdrop.open {
-      display: flex;
-      animation: backdrop-in .25s ease forwards;
-    }
+  border-color: var(--green);
 
-    @keyframes backdrop-in {
-      to {
-        opacity: 1;
-      }
-    }
+  transform: translateX(4px);
+}
 
-    .modal-terminal {
-      width: min(100%, 560px);
+.arrow {
+  color: var(--green);
+}
 
-      overflow: hidden;
+/* =====================================================
+   COMMENTS
+===================================================== */
 
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
+.comments-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-      box-shadow:
-        0 40px 100px rgba(0, 0, 0, .75),
-        0 0 40px rgba(111, 227, 161, .04);
+  cursor: pointer;
+  user-select: none;
 
-      animation: modal-in .3s cubic-bezier(.22, 1, .36, 1);
-    }
+  transition: color .2s ease;
+}
 
-    @keyframes modal-in {
-      from {
-        opacity: 0;
-        transform: scale(.94) translateY(12px);
-      }
+.comments-toggle:hover {
+  color: var(--green);
+}
 
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
+.comments-toggle .chevron {
+  color: var(--green);
 
-    .modal-close {
-      margin-left: .5rem;
+  transition:
+    transform .25s ease;
+}
 
-      background: transparent;
-      border: 0;
+.comments-toggle.closed .chevron {
+  transform: rotate(-90deg);
+}
 
-      color: var(--text-dim);
-      font-family: var(--font);
-      font-size: .8rem;
+#commentsBox {
+  max-height: 2000px;
 
-      cursor: pointer;
-    }
+  overflow: hidden;
 
-    .modal-close:hover {
-      color: var(--orange);
-    }
+  opacity: 1;
 
-    .modal-body {
-      padding: 1.25rem;
-    }
+  transition:
+    max-height .4s ease,
+    opacity .25s ease;
+}
 
-    .modal-hint {
-      margin-bottom: .8rem;
+#commentsBox.closed {
+  max-height: 0;
+  opacity: 0;
+}
 
-      color: var(--text-dim);
-      font-size: .72rem;
-    }
+/* =====================================================
+   SECRET BUTTON
+===================================================== */
 
-    .modal-log {
-      max-height: 190px;
+.secret-wrap {
+  display: flex;
+  justify-content: center;
 
-      margin-bottom: .75rem;
+  margin-top: 1.4rem;
+}
 
-      overflow-y: auto;
+.secret-btn {
+  background: transparent;
+  border: 0;
 
-      display: flex;
-      flex-direction: column;
-      gap: .35rem;
+  color: var(--text-dim);
 
-      scrollbar-width: thin;
-    }
+  font-family: var(--font);
+  font-size: .66rem;
 
-    .line {
-      color: var(--text);
-      font-size: .78rem;
-      overflow-wrap: anywhere;
-    }
+  letter-spacing: 1px;
 
-    .line.echo {
-      color: var(--text-dim);
-    }
+  cursor: pointer;
 
-    .line.ok {
-      color: var(--green);
-    }
+  opacity: .5;
 
-    .line.err {
-      color: var(--pink);
-    }
+  transition:
+    opacity .2s ease,
+    color .2s ease;
+}
 
-    /* Snake */
+.secret-btn:hover {
+  color: var(--green);
+  opacity: 1;
 
-    #snakeCanvas {
-      display: none;
+  animation:
+    glitch .35s steps(2) infinite;
+}
 
-      width: min(240px, 75vw);
-      height: auto;
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+  }
 
-      margin: 0 auto .75rem;
+  25% {
+    transform: translate(-1px,1px);
+  }
 
-      background: #0a0e14;
-      border: 1px solid var(--border);
-      border-radius: 6px;
+  50% {
+    transform: translate(1px,-1px);
+  }
 
-      image-rendering: pixelated;
-    }
+  75% {
+    transform: translate(-1px,-1px);
+  }
 
-    #snakeControls {
-      display: none;
+  100% {
+    transform: translate(0);
+  }
+}
 
-      justify-content: center;
+/* =====================================================
+   FOOTER
+===================================================== */
 
-      margin-bottom: .75rem;
-    }
+footer {
+  padding: 1.75rem 1rem 0;
 
-    .dpad {
-      display: grid;
+  color: var(--text-dim);
 
-      grid-template-columns: repeat(3, 38px);
-      grid-template-rows: repeat(3, 38px);
+  font-size: .68rem;
 
-      gap: 4px;
-    }
+  text-align: center;
+}
 
-    .dpad-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+footer .tag {
+  color: var(--orange);
+}
 
-      background: #0a0e14;
-      border: 1px solid var(--border);
-      border-radius: 5px;
+/* =====================================================
+   MODAL
+===================================================== */
 
-      color: var(--green);
-      font-family: var(--font);
-      font-size: .9rem;
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
 
-      cursor: pointer;
-      user-select: none;
-      touch-action: manipulation;
+  z-index: 100;
 
-      transition:
-        background .15s ease,
-        border-color .15s ease;
-    }
+  display: none;
 
-    .dpad-btn:active {
-      background: var(--green-soft);
-      border-color: var(--green);
-    }
+  align-items: center;
+  justify-content: center;
 
-    /* Input */
+  padding: 1rem;
 
-    .modal-inputline {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
+  background: rgba(3,5,8,.78);
 
-      padding-top: .75rem;
+  backdrop-filter: blur(7px);
 
-      border-top: 1px solid var(--border);
-    }
+  opacity: 0;
+}
 
-    .sym {
-      color: var(--green);
-    }
+.modal-backdrop.open {
+  display: flex;
 
-    .modal-inputline input {
-      flex: 1;
+  animation:
+    fadeModal .25s ease forwards;
+}
 
-      min-width: 0;
+@keyframes fadeModal {
+  to {
+    opacity: 1;
+  }
+}
 
-      background: transparent;
-      border: 0;
-      outline: 0;
+.modal-terminal {
+  width: min(100%,560px);
 
-      color: var(--text);
-      font-family: var(--font);
-      font-size: .8rem;
-    }
+  overflow: hidden;
 
-    .modal-inputline input::placeholder {
-      color: var(--text-dim);
-    }
+  background: var(--panel);
 
-    .modal-inputline input:disabled {
-      opacity: .35;
-    }
+  border: 1px solid var(--border);
+  border-radius: 12px;
 
-    /* Mobile */
+  box-shadow:
+    0 40px 100px rgba(0,0,0,.75),
+    0 0 40px rgba(111,227,161,.04);
 
-    @media (max-width: 520px) {
-      body {
-        padding: 1rem .7rem 2rem;
-      }
+  animation:
+    modalIn .3s cubic-bezier(.22,1,.36,1);
+}
 
-      .screen {
-        padding: 1.4rem 1.15rem 1.75rem;
-      }
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(.94) translateY(12px);
+  }
 
-      .title-bar,
-      .modal-titlebar {
-        min-height: 44px;
-        padding: .65rem .8rem;
-      }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
 
-      .window-title {
-        font-size: .6rem;
-      }
+.modal-titlebar {
+  display: flex;
+  align-items: center;
 
-      .output {
-        font-size: .86rem;
-      }
+  min-height: 46px;
 
-      .links a {
-        font-size: .76rem;
-        overflow-wrap: anywhere;
-      }
+  padding: .7rem 1rem;
 
-      .modal-body {
-        padding: 1rem;
-      }
-    }
+  background: rgba(8,12,17,.9);
 
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        scroll-behavior: auto !important;
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .01ms !important;
-      }
-    }
-  </style>
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-close {
+  margin-left: .7rem;
+
+  background: transparent;
+  border: 0;
+
+  color: var(--text-dim);
+
+  font-family: var(--font);
+
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: var(--orange);
+}
+
+.modal-body {
+  padding: 1.25rem;
+}
+
+.modal-hint {
+  margin-bottom: .8rem;
+
+  color: var(--text-dim);
+
+  font-size: .72rem;
+}
+
+/* =====================================================
+   TERMINAL LOG
+===================================================== */
+
+.modal-log {
+  max-height: 190px;
+
+  margin-bottom: .75rem;
+
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: .35rem;
+}
+
+.line {
+  color: var(--text);
+
+  font-size: .78rem;
+
+  overflow-wrap: anywhere;
+}
+
+.line.echo {
+  color: var(--text-dim);
+}
+
+.line.ok {
+  color: var(--green);
+}
+
+.line.err {
+  color: var(--pink);
+}
+
+/* =====================================================
+   SNAKE
+===================================================== */
+
+#snakeCanvas {
+  display: none;
+
+  width: min(240px,75vw);
+  height: auto;
+
+  margin: 0 auto .75rem;
+
+  background: #0a0e14;
+
+  border: 1px solid var(--border);
+  border-radius: 6px;
+
+  image-rendering: pixelated;
+}
+
+#snakeControls {
+  display: none;
+
+  justify-content: center;
+
+  margin-bottom: .75rem;
+}
+
+.dpad {
+  display: grid;
+
+  grid-template-columns: repeat(3,38px);
+  grid-template-rows: repeat(3,38px);
+
+  gap: 4px;
+}
+
+.dpad-btn {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #0a0e14;
+
+  border: 1px solid var(--border);
+  border-radius: 5px;
+
+  color: var(--green);
+
+  font-family: var(--font);
+
+  cursor: pointer;
+
+  touch-action: manipulation;
+}
+
+.dpad-btn:active {
+  background: var(--green-soft);
+
+  border-color: var(--green);
+}
+
+/* =====================================================
+   INPUT
+===================================================== */
+
+.modal-inputline {
+  display: flex;
+  align-items: center;
+
+  gap: .5rem;
+
+  padding-top: .75rem;
+
+  border-top: 1px solid var(--border);
+}
+
+.sym {
+  color: var(--green);
+}
+
+.modal-inputline input {
+  flex: 1;
+
+  min-width: 0;
+
+  background: transparent;
+
+  border: 0;
+  outline: 0;
+
+  color: var(--text);
+
+  font-family: var(--font);
+  font-size: .8rem;
+}
+
+.modal-inputline input::placeholder {
+  color: var(--text-dim);
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width:520px) {
+
+  body {
+    padding: 1rem .7rem 2rem;
+  }
+
+  .screen {
+    padding: 1.4rem 1.15rem 1.75rem;
+  }
+
+  .output {
+    font-size: .86rem;
+  }
+
+  .links a {
+    font-size: .76rem;
+
+    overflow-wrap: anywhere;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+}
+
+/* =====================================================
+   REDUCED MOTION
+===================================================== */
+
+@media (prefers-reduced-motion:reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+
+    transition-duration: .01ms !important;
+  }
+}
+
+</style>
 </head>
 
 <body>
 
-  <main class="terminal" aria-label="SyntaxCrash portfolio">
+<!-- =====================================================
+     MAIN TERMINAL
+===================================================== -->
 
-    <header class="title-bar">
-      <div class="window-dots" aria-hidden="true">
+<main class="terminal">
+
+  <header class="title-bar">
+
+    <div class="window-dots">
+
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+
+    </div>
+
+    <span class="window-title">
+      guest@syntaxcrash: ~
+    </span>
+
+  </header>
+
+
+  <div class="screen">
+
+    <!-- BOOT -->
+
+    <div class="prompt">
+
+      <span class="user">
+        guest@syntaxcrash
+      </span>
+
+      <span>:</span>
+
+      <span class="path">
+        ~
+      </span>
+
+      <span class="command">
+        $
+      </span>
+
+      <span id="typedCommand"></span>
+
+      <span class="typing-cursor"></span>
+
+    </div>
+
+
+    <!-- NAME -->
+
+    <h1 class="ascii-name" id="siteName">
+
+      SyntaxCrash
+
+      <span class="name-cursor"></span>
+
+    </h1>
+
+
+    <!-- HANDLE -->
+
+    <div class="handle" id="siteHandle">
+
+      alias:
+      <span class="alias">
+        Shad0wza
+      </span>
+
+    </div>
+
+
+    <!-- ABOUT -->
+
+    <section class="content-section">
+
+      <div class="field">
+        about
+      </div>
+
+      <p class="output">
+
+        I'm SyntaxCrash aka Shad0wza, 15 years old.
+        I'm a first-year high school student studying cybersecurity,
+        and my goal is to become a cybersecurity engineer one day.
+
+      </p>
+
+    </section>
+
+
+    <!-- STATUS -->
+
+    <section class="content-section">
+
+      <div class="field">
+        status
+      </div>
+
+      <div class="status-line">
+
+        <span class="pulse"></span>
+
+        <span>
+          currently learning — open to connect
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- CONTACT -->
+
+    <section class="content-section">
+
+      <div class="field">
+        contact
+      </div>
+
+      <nav class="links">
+
+        <a href="mailto:Shad0wza@protonmail.com">
+
+          <span class="arrow">›</span>
+
+          email · Shad0wza@protonmail.com
+
+        </a>
+
+
+        <a
+          href="https://github.com/SyntaxCrash"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+
+          <span class="arrow">›</span>
+
+          github · /SyntaxCrash
+
+        </a>
+
+      </nav>
+
+    </section>
+
+
+    <!-- COMMENTS -->
+
+    <section class="content-section">
+
+      <div
+        class="field comments-toggle closed"
+        id="commentsToggle"
+        role="button"
+        tabindex="0"
+        aria-expanded="false"
+      >
+
+        <span>
+          comments
+        </span>
+
+        <span class="chevron">
+          ▾
+        </span>
+
+      </div>
+
+
+      <div id="commentsBox" class="closed">
+
+        <script
+          src="https://giscus.app/client.js"
+          data-repo="SyntaxCrash/SyntaxCrash.github.io"
+          data-repo-id="R_kgDOUBgR2g"
+          data-category="General"
+          data-category-id="DIC_kwDOUBgR2s4DEFNm"
+          data-mapping="pathname"
+          data-strict="0"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="top"
+          data-theme="noborder_dark"
+          data-lang="fr"
+          crossorigin="anonymous"
+          async>
+        </script>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</main>
+
+
+<!-- =====================================================
+     SECRET BUTTON
+===================================================== -->
+
+<div class="secret-wrap">
+
+  <button
+    class="secret-btn"
+    id="secretButton"
+    type="button"
+  >
+    [ ??? ]
+  </button>
+
+</div>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+  © 2026 SyntaxCrash
+
+  <span class="tag">
+    // keep learning
+  </span>
+
+</footer>
+
+
+<!-- =====================================================
+     SECRET TERMINAL
+===================================================== -->
+
+<div
+  class="modal-backdrop"
+  id="secretModal"
+  role="dialog"
+  aria-modal="true"
+>
+
+  <div class="modal-terminal">
+
+    <header class="modal-titlebar">
+
+      <div class="window-dots">
+
         <span class="dot red"></span>
         <span class="dot yellow"></span>
         <span class="dot green"></span>
+
       </div>
 
       <span class="window-title">
-        guest@syntaxcrash: ~
+        hidden-shell
       </span>
+
+      <button
+        class="modal-close"
+        id="modalClose"
+        type="button"
+      >
+        [x]
+      </button>
+
     </header>
 
-    <div class="screen">
 
-      <div class="prompt" aria-label="terminal command">
-        <span class="user">guest@syntaxcrash</span>
-        <span>:</span>
-        <span class="path">~</span>
-        <span class="command">$ whoami</span>
-      </div>
+    <div class="modal-body">
 
-      <h1 class="ascii-name">
-        SyntaxCrash<span class="cursor" aria-hidden="true"></span>
-      </h1>
+      <p class="modal-hint">
+        Type a command ("help" for the list)
+      </p>
 
-      <div class="handle">
-        alias: <span class="alias">Shad0wza</span>
-      </div>
 
-      <section>
-        <div class="field">about</div>
+      <div
+        class="modal-log"
+        id="modalLog"
+      >
 
-        <p class="output">
-          I'm SyntaxCrash aka Shad0wza, 15 years old.
-          I'm a first-year high school student studying cybersecurity,
-          and my goal is to become a cybersecurity engineer one day.
-        </p>
-      </section>
+        <div class="line">
 
-      <section>
-        <div class="field">status</div>
+          Welcome.
+          Type
+          <span class="ok">help</span>
+          to see what you can do here.
 
-        <div class="status-line">
-          <span class="pulse" aria-hidden="true"></span>
-          <span>currently learning — open to connect</span>
         </div>
-      </section>
 
-      <section>
-        <div class="field">contact</div>
+      </div>
 
-        <nav class="links" aria-label="Contact links">
 
-          <a href="mailto:Shad0wza@protonmail.com">
-            <span class="arrow" aria-hidden="true">›</span>
-            email · Shad0wza@protonmail.com
-          </a>
+      <!-- SNAKE -->
 
-          <a
-            href="https://github.com/SyntaxCrash"
-            target="_blank"
-            rel="noopener noreferrer"
+      <canvas
+        id="snakeCanvas"
+        width="240"
+        height="240"
+      ></canvas>
+
+
+      <!-- SNAKE CONTROLS -->
+
+      <div id="snakeControls">
+
+        <div class="dpad">
+
+          <span></span>
+
+          <button
+            class="dpad-btn"
+            data-dir="up"
+            type="button"
           >
-            <span class="arrow" aria-hidden="true">›</span>
-            github · /SyntaxCrash
-          </a>
+            ▲
+          </button>
 
-        </nav>
-      </section>
+          <span></span>
 
-      <section>
-        <div
-          class="field comments-toggle closed"
-          id="commentsToggle"
-          role="button"
-          tabindex="0"
-          aria-expanded="false"
-          aria-controls="commentsBox"
-        >
-          <span>comments</span>
-          <span class="chevron" aria-hidden="true">▾</span>
-        </div>
 
-        <div id="commentsBox" class="closed">
+          <button
+            class="dpad-btn"
+            data-dir="left"
+            type="button"
+          >
+            ◀
+          </button>
 
-          <script
-            src="https://giscus.app/client.js"
-            data-repo="SyntaxCrash/SyntaxCrash.github.io"
-            data-repo-id="R_kgDOUBgR2g"
-            data-category="General"
-            data-category-id="DIC_kwDOUBgR2s4DEFNm"
-            data-mapping="pathname"
-            data-strict="0"
-            data-reactions-enabled="1"
-            data-emit-metadata="0"
-            data-input-position="top"
-            data-theme="noborder_dark"
-            data-lang="fr"
-            crossorigin="anonymous"
-            async>
-          </script>
+          <span></span>
+
+          <button
+            class="dpad-btn"
+            data-dir="right"
+            type="button"
+          >
+            ▶
+          </button>
+
+
+          <span></span>
+
+          <button
+            class="dpad-btn"
+            data-dir="down"
+            type="button"
+          >
+            ▼
+          </button>
+
+          <span></span>
 
         </div>
-      </section>
 
-    </div>
-  </main>
+      </div>
 
-  <!-- Secret easter egg -->
 
-  <div class="secret-wrap">
-    <button
-      class="secret-btn"
-      id="secretButton"
-      type="button"
-      aria-label="Open hidden terminal"
-    >
-      [ ??? ]
-    </button>
-  </div>
+      <!-- COMMAND INPUT -->
 
-  <footer>
-    © 2026 SyntaxCrash
-    <span class="tag">// keep learning</span>
-  </footer>
+      <div class="modal-inputline">
 
-  <!-- Hidden terminal -->
-
-  <div
-    class="modal-backdrop"
-    id="secretModal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="hiddenShellTitle"
-  >
-
-    <div class="modal-terminal">
-
-      <header class="modal-titlebar">
-
-        <div class="window-dots" aria-hidden="true">
-          <span class="dot red"></span>
-          <span class="dot yellow"></span>
-          <span class="dot green"></span>
-        </div>
-
-        <span class="window-title" id="hiddenShellTitle">
-          hidden-shell
+        <span class="sym">
+          $
         </span>
 
-        <button
-          class="modal-close"
-          id="modalClose"
-          type="button"
-          aria-label="Close terminal"
+        <input
+          type="text"
+          id="modalInput"
+          placeholder="type a command..."
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
         >
-          [x]
-        </button>
-
-      </header>
-
-      <div class="modal-body">
-
-        <p class="modal-hint">
-          Type a command — "help" for the list
-        </p>
-
-        <div
-          class="modal-log"
-          id="modalLog"
-          aria-live="polite"
-        >
-          <div class="line">
-            Welcome. Type <span class="ok">help</span>
-            to see what you can do here.
-          </div>
-        </div>
-
-        <canvas
-          id="snakeCanvas"
-          width="240"
-          height="240"
-          aria-label="Snake game"
-        ></canvas>
-
-        <div id="snakeControls">
-          <div class="dpad">
-
-            <span></span>
-
-            <button class="dpad-btn" data-dir="up" type="button">
-              ▲
-            </button>
-
-            <span></span>
-
-            <button class="dpad-btn" data-dir="left" type="button">
-              ◀
-            </button>
-
-            <span></span>
-
-            <button class="dpad-btn" data-dir="right" type="button">
-              ▶
-            </button>
-
-            <span></span>
-
-            <button class="dpad-btn" data-dir="down" type="button">
-              ▼
-            </button>
-
-            <span></span>
-
-          </div>
-        </div>
-
-        <div class="modal-inputline">
-          <span class="sym">$</span>
-
-          <input
-            id="modalInput"
-            type="text"
-            placeholder="type a command..."
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            aria-label="Terminal command"
-          >
-        </div>
 
       </div>
+
     </div>
+
   </div>
 
-  <script>
-    "use strict";
+</div>
 
-    /* =========================
-       CONFIG
-    ========================= */
 
-    const COMMANDS = Object.freeze({
-      music: {
-        url: "https://www.youtube.com/@prod.RottenFoxy",
-        message: "Opening YouTube channel..."
-      },
+<script>
 
-      short: {
-        url: "https://www.tiktok.com/@skanl.rrr22",
-        message: "Opening TikTok..."
-      }
-    });
+/* =====================================================
+   COMMANDS
+===================================================== */
 
-    const SNAKE = {
-      cell: 12,
-      speed: 150
+const COMMANDS = {
+
+  music: {
+    url: "https://www.youtube.com/@prod.RottenFoxy",
+    message: "Opening YouTube channel..."
+  },
+
+  short: {
+    url: "https://www.tiktok.com/@skanl.rrr22",
+    message: "Opening TikTok..."
+  }
+
+};
+
+
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const typedCommand =
+  document.getElementById("typedCommand");
+
+const siteName =
+  document.getElementById("siteName");
+
+const siteHandle =
+  document.getElementById("siteHandle");
+
+const sections =
+  document.querySelectorAll(".content-section");
+
+const modal =
+  document.getElementById("secretModal");
+
+const input =
+  document.getElementById("modalInput");
+
+const log =
+  document.getElementById("modalLog");
+
+const secretButton =
+  document.getElementById("secretButton");
+
+const modalClose =
+  document.getElementById("modalClose");
+
+const commentsToggle =
+  document.getElementById("commentsToggle");
+
+const commentsBox =
+  document.getElementById("commentsBox");
+
+
+/* =====================================================
+   BOOT ANIMATION
+===================================================== */
+
+const bootCommand = "whoami";
+
+function typeBootCommand() {
+
+  let index = 0;
+
+  const timer = setInterval(() => {
+
+    typedCommand.textContent =
+      bootCommand.slice(0,index + 1);
+
+    index++;
+
+    if(index >= bootCommand.length) {
+
+      clearInterval(timer);
+
+      setTimeout(() => {
+
+        document
+          .querySelector(".typing-cursor")
+          .style.display = "none";
+
+        revealSite();
+
+      },450);
+
+    }
+
+  },90);
+
+}
+
+
+function revealSite() {
+
+  siteName.classList.add("show");
+
+  setTimeout(() => {
+
+    siteHandle.classList.add("show");
+
+  },250);
+
+
+  sections.forEach((section,index) => {
+
+    setTimeout(() => {
+
+      section.classList.add("show");
+
+    },500 + index * 180);
+
+  });
+
+}
+
+
+/* =====================================================
+   COMMENTS
+===================================================== */
+
+function toggleComments() {
+
+  const closed =
+    commentsBox.classList.toggle("closed");
+
+  commentsToggle.classList.toggle(
+    "closed",
+    closed
+  );
+
+  commentsToggle.setAttribute(
+    "aria-expanded",
+    String(!closed)
+  );
+
+}
+
+
+commentsToggle.addEventListener(
+  "click",
+  toggleComments
+);
+
+
+commentsToggle.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Enter" ||
+      event.key === " "
+    ) {
+
+      event.preventDefault();
+
+      toggleComments();
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   SECRET TERMINAL
+===================================================== */
+
+function openSecretTerminal() {
+
+  modal.style.display = "flex";
+
+  requestAnimationFrame(() => {
+
+    modal.classList.add("open");
+
+  });
+
+  input.value = "";
+
+  setTimeout(() => {
+
+    input.focus();
+
+  },150);
+
+}
+
+
+function closeSecretTerminal() {
+
+  if(gameActive) {
+
+    endSnake();
+
+  }
+
+  modal.classList.remove("open");
+
+  setTimeout(() => {
+
+    modal.style.display = "none";
+
+  },250);
+
+}
+
+
+secretButton.addEventListener(
+  "click",
+  openSecretTerminal
+);
+
+
+modalClose.addEventListener(
+  "click",
+  closeSecretTerminal
+);
+
+
+modal.addEventListener(
+  "click",
+  event => {
+
+    if(event.target === modal) {
+
+      closeSecretTerminal();
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   TERMINAL LOG
+===================================================== */
+
+function addLine(text,type="") {
+
+  const line =
+    document.createElement("div");
+
+  line.className =
+    `line ${type}`.trim();
+
+  line.textContent = text;
+
+  log.appendChild(line);
+
+  log.scrollTop =
+    log.scrollHeight;
+
+}
+
+
+/* =====================================================
+   SNAKE
+===================================================== */
+
+const canvas =
+  document.getElementById("snakeCanvas");
+
+const ctx =
+  canvas.getContext("2d");
+
+const controls =
+  document.getElementById("snakeControls");
+
+const CELL = 12;
+
+const COLS =
+  canvas.width / CELL;
+
+const ROWS =
+  canvas.height / CELL;
+
+let snake = [];
+
+let direction = {
+  x: 1,
+  y: 0
+};
+
+let nextDirection = {
+  x: 1,
+  y: 0
+};
+
+let food = {};
+
+let score = 0;
+
+let gameInterval = null;
+
+let gameActive = false;
+
+
+/* =====================================================
+   FOOD
+===================================================== */
+
+function placeFood() {
+
+  let newFood;
+
+  do {
+
+    newFood = {
+
+      x: Math.floor(
+        Math.random() * COLS
+      ),
+
+      y: Math.floor(
+        Math.random() * ROWS
+      )
+
     };
 
-    /* =========================
-       DOM
-    ========================= */
+  } while(
+    snake.some(
+      part =>
+        part.x === newFood.x &&
+        part.y === newFood.y
+    )
+  );
 
-    const modal = document.getElementById("secretModal");
-    const input = document.getElementById("modalInput");
-    const log = document.getElementById("modalLog");
+  food = newFood;
 
-    const secretButton = document.getElementById("secretButton");
-    const modalClose = document.getElementById("modalClose");
+}
 
-    const commentsToggle =
-      document.getElementById("commentsToggle");
 
-    const commentsBox =
-      document.getElementById("commentsBox");
+/* =====================================================
+   DRAW
+===================================================== */
 
-    const snakeCanvas =
-      document.getElementById("snakeCanvas");
+function drawSnake() {
 
-    const snakeControls =
-      document.getElementById("snakeControls");
+  ctx.fillStyle = "#0a0e14";
 
-    const ctx =
-      snakeCanvas.getContext("2d");
+  ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
 
-    /* =========================
-       COMMENTS
-    ========================= */
 
-    function toggleComments() {
-      const closed =
-        commentsBox.classList.toggle("closed");
+  snake.forEach((part,index) => {
 
-      commentsToggle.classList.toggle(
-        "closed",
-        closed
-      );
+    ctx.globalAlpha =
+      index === 0 ? 1 : .8;
 
-      commentsToggle.setAttribute(
-        "aria-expanded",
-        String(!closed)
-      );
+    ctx.fillStyle =
+      "#6fe3a1";
+
+    ctx.fillRect(
+      part.x * CELL,
+      part.y * CELL,
+      CELL - 1,
+      CELL - 1
+    );
+
+  });
+
+
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle =
+    "#ffb454";
+
+  ctx.fillRect(
+    food.x * CELL,
+    food.y * CELL,
+    CELL - 1,
+    CELL - 1
+  );
+
+}
+
+
+/* =====================================================
+   GAME LOOP
+===================================================== */
+
+function stepSnake() {
+
+  direction =
+    nextDirection;
+
+  const head = {
+
+    x:
+      snake[0].x +
+      direction.x,
+
+    y:
+      snake[0].y +
+      direction.y
+
+  };
+
+
+  const hitWall =
+    head.x < 0 ||
+    head.x >= COLS ||
+    head.y < 0 ||
+    head.y >= ROWS;
+
+
+  const hitSelf =
+    snake.some(
+      part =>
+        part.x === head.x &&
+        part.y === head.y
+    );
+
+
+  if(hitWall || hitSelf) {
+
+    endSnake();
+
+    return;
+
+  }
+
+
+  snake.unshift(head);
+
+
+  if(
+    head.x === food.x &&
+    head.y === food.y
+  ) {
+
+    score++;
+
+    placeFood();
+
+  } else {
+
+    snake.pop();
+
+  }
+
+
+  drawSnake();
+
+}
+
+
+/* =====================================================
+   START SNAKE
+===================================================== */
+
+function startSnake() {
+
+  if(gameActive) return;
+
+  gameActive = true;
+
+  canvas.style.display =
+    "block";
+
+  controls.style.display =
+    "flex";
+
+  input.disabled = true;
+
+
+  snake = [
+    {
+      x: 5,
+      y: 5
+    }
+  ];
+
+
+  direction = {
+    x: 1,
+    y: 0
+  };
+
+
+  nextDirection = {
+    x: 1,
+    y: 0
+  };
+
+
+  score = 0;
+
+  placeFood();
+
+  drawSnake();
+
+  clearInterval(gameInterval);
+
+  gameInterval =
+    setInterval(
+      stepSnake,
+      150
+    );
+
+
+  addLine(
+    "snake started — arrow keys or touch controls, ESC to quit",
+    "ok"
+  );
+
+}
+
+
+/* =====================================================
+   END SNAKE
+===================================================== */
+
+function endSnake() {
+
+  clearInterval(gameInterval);
+
+  gameInterval = null;
+
+  gameActive = false;
+
+  canvas.style.display =
+    "none";
+
+  controls.style.display =
+    "none";
+
+  input.disabled = false;
+
+
+  addLine(
+    "game over — score: " + score,
+    "err"
+  );
+
+
+  input.focus();
+
+}
+
+
+/* =====================================================
+   SNAKE DIRECTION
+===================================================== */
+
+function setSnakeDirection(name) {
+
+  if(!gameActive) return;
+
+
+  const directions = {
+
+    up: {
+      x: 0,
+      y: -1
+    },
+
+    down: {
+      x: 0,
+      y: 1
+    },
+
+    left: {
+      x: -1,
+      y: 0
+    },
+
+    right: {
+      x: 1,
+      y: 0
     }
 
-    commentsToggle.addEventListener(
+  };
+
+
+  const newDirection =
+    directions[name];
+
+
+  if(!newDirection) return;
+
+
+  const reverse =
+    newDirection.x === -direction.x &&
+    newDirection.y === -direction.y;
+
+
+  if(!reverse) {
+
+    nextDirection =
+      newDirection;
+
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE CONTROLS
+===================================================== */
+
+document
+  .querySelectorAll(".dpad-btn")
+  .forEach(button => {
+
+    button.addEventListener(
       "click",
-      toggleComments
-    );
+      () => {
 
-    commentsToggle.addEventListener(
-      "keydown",
-      event => {
-        if (
-          event.key === "Enter" ||
-          event.key === " "
-        ) {
-          event.preventDefault();
-          toggleComments();
-        }
-      }
-    );
-
-    /* =========================
-       SECRET TERMINAL
-    ========================= */
-
-    function openSecretTerminal() {
-      modal.style.display = "flex";
-
-      requestAnimationFrame(() => {
-        modal.classList.add("open");
-      });
-
-      input.value = "";
-
-      setTimeout(() => {
-        input.focus();
-      }, 120);
-    }
-
-    function closeSecretTerminal() {
-      if (gameActive) {
-        endSnake();
-      }
-
-      modal.classList.remove("open");
-
-      setTimeout(() => {
-        modal.style.display = "none";
-      }, 250);
-    }
-
-    secretButton.addEventListener(
-      "click",
-      openSecretTerminal
-    );
-
-    modalClose.addEventListener(
-      "click",
-      closeSecretTerminal
-    );
-
-    modal.addEventListener(
-      "click",
-      event => {
-        if (event.target === modal) {
-          closeSecretTerminal();
-        }
-      }
-    );
-
-    /* =========================
-       TERMINAL LOG
-    ========================= */
-
-    function addLine(text, type = "") {
-      const line =
-        document.createElement("div");
-
-      line.className =
-        `line ${type}`.trim();
-
-      line.textContent = text;
-
-      log.appendChild(line);
-
-      log.scrollTop =
-        log.scrollHeight;
-    }
-
-    /* =========================
-       SNAKE
-    ========================= */
-
-    const cols =
-      snakeCanvas.width / SNAKE.cell;
-
-    const rows =
-      snakeCanvas.height / SNAKE.cell;
-
-    let snakeBody = [];
-    let direction = { x: 1, y: 0 };
-    let nextDirection = { x: 1, y: 0 };
-
-    let food = { x: 0, y: 0 };
-
-    let score = 0;
-    let gameInterval = null;
-    let gameActive = false;
-
-    function placeFood() {
-      let position;
-
-      do {
-        position = {
-          x: Math.floor(Math.random() * cols),
-          y: Math.floor(Math.random() * rows)
-        };
-      } while (
-        snakeBody.some(
-          part =>
-            part.x === position.x &&
-            part.y === position.y
-        )
-      );
-
-      food = position;
-    }
-
-    function drawSnake() {
-      ctx.fillStyle = "#0a0e14";
-
-      ctx.fillRect(
-        0,
-        0,
-        snakeCanvas.width,
-        snakeCanvas.height
-      );
-
-      ctx.fillStyle = "#6fe3a1";
-
-      snakeBody.forEach(
-        ({ x, y }, index) => {
-
-          ctx.globalAlpha =
-            index === 0 ? 1 : .8;
-
-          ctx.fillRect(
-            x * SNAKE.cell,
-            y * SNAKE.cell,
-            SNAKE.cell - 1,
-            SNAKE.cell - 1
-          );
-        }
-      );
-
-      ctx.globalAlpha = 1;
-
-      ctx.fillStyle = "#ffb454";
-
-      ctx.fillRect(
-        food.x * SNAKE.cell,
-        food.y * SNAKE.cell,
-        SNAKE.cell - 1,
-        SNAKE.cell - 1
-      );
-    }
-
-    function stepSnake() {
-      direction = nextDirection;
-
-      const head = {
-        x: snakeBody[0].x + direction.x,
-        y: snakeBody[0].y + direction.y
-      };
-
-      const hitWall =
-        head.x < 0 ||
-        head.x >= cols ||
-        head.y < 0 ||
-        head.y >= rows;
-
-      const hitSelf =
-        snakeBody.some(
-          part =>
-            part.x === head.x &&
-            part.y === head.y
+        setSnakeDirection(
+          button.dataset.dir
         );
 
-      if (hitWall || hitSelf) {
-        endSnake();
-        return;
       }
+    );
 
-      snakeBody.unshift(head);
+  });
 
-      if (
-        head.x === food.x &&
-        head.y === food.y
-      ) {
-        score++;
-        placeFood();
-      } else {
-        snakeBody.pop();
-      }
 
-      drawSnake();
+/* =====================================================
+   KEYBOARD
+===================================================== */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Escape" &&
+      gameActive
+    ) {
+
+      event.preventDefault();
+
+      endSnake();
+
+      return;
+
     }
 
-    function startSnake() {
-      if (gameActive) return;
 
-      gameActive = true;
+    if(
+      event.key === "Escape" &&
+      modal.classList.contains("open") &&
+      !gameActive
+    ) {
 
-      snakeCanvas.style.display = "block";
-      snakeControls.style.display = "flex";
+      closeSecretTerminal();
 
-      input.disabled = true;
+      return;
 
-      snakeBody = [
-        { x: 5, y: 5 }
-      ];
+    }
 
-      direction = { x: 1, y: 0 };
-      nextDirection = { x: 1, y: 0 };
 
-      score = 0;
+    if(!gameActive) return;
 
-      placeFood();
-      drawSnake();
 
-      clearInterval(gameInterval);
+    const keys = {
 
-      gameInterval =
-        setInterval(
-          stepSnake,
-          SNAKE.speed
-        );
+      ArrowUp: "up",
+      ArrowDown: "down",
+      ArrowLeft: "left",
+      ArrowRight: "right"
+
+    };
+
+
+    const directionName =
+      keys[event.key];
+
+
+    if(!directionName) return;
+
+
+    event.preventDefault();
+
+
+    setSnakeDirection(
+      directionName
+    );
+
+  }
+);
+
+
+/* =====================================================
+   TERMINAL COMMANDS
+===================================================== */
+
+input.addEventListener(
+  "keydown",
+  event => {
+
+    if(event.key !== "Enter") return;
+
+
+    const raw =
+      input.value.trim();
+
+
+    if(!raw) return;
+
+
+    addLine(
+      "$ " + raw,
+      "echo"
+    );
+
+
+    const command =
+      raw.toLowerCase();
+
+
+    if(command === "help") {
 
       addLine(
-        "snake started — arrow keys or touch controls, ESC to quit",
+        "available commands: help, music, short, snake, clear",
         "ok"
       );
+
     }
 
-    function endSnake() {
-      clearInterval(gameInterval);
+    else if(command === "clear") {
 
-      gameInterval = null;
-      gameActive = false;
+      log.replaceChildren();
 
-      snakeCanvas.style.display = "none";
-      snakeControls.style.display = "none";
+    }
 
-      input.disabled = false;
+    else if(command === "snake") {
+
+      startSnake();
+
+    }
+
+    else if(COMMANDS[command]) {
+
+      const selected =
+        COMMANDS[command];
+
 
       addLine(
-        `game over — score: ${score}`,
+        selected.message,
+        "ok"
+      );
+
+
+      window.open(
+        selected.url,
+        "_blank",
+        "noopener,noreferrer"
+      );
+
+    }
+
+    else {
+
+      addLine(
+        "command not found: " + raw,
         "err"
       );
 
-      input.focus();
     }
 
-    function setSnakeDirection(name) {
-      if (!gameActive) return;
 
-      const directions = {
-        up: { x: 0, y: -1 },
-        down: { x: 0, y: 1 },
-        left: { x: -1, y: 0 },
-        right: { x: 1, y: 0 }
-      };
+    input.value = "";
 
-      const newDirection =
-        directions[name];
+  }
+);
 
-      if (!newDirection) return;
 
-      const reverse =
-        newDirection.x === -direction.x &&
-        newDirection.y === -direction.y;
+/* =====================================================
+   START SITE
+===================================================== */
 
-      if (!reverse) {
-        nextDirection =
-          newDirection;
-      }
-    }
+window.addEventListener(
+  "DOMContentLoaded",
+  () => {
 
-    document
-      .querySelectorAll(".dpad-btn")
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-            setSnakeDirection(
-              button.dataset.dir
-            );
-          }
-        );
-      });
-
-    /* =========================
-       KEYBOARD
-    ========================= */
-
-    document.addEventListener(
-      "keydown",
-      event => {
-
-        if (
-          event.key === "Escape" &&
-          gameActive
-        ) {
-          event.preventDefault();
-          endSnake();
-          return;
-        }
-
-        if (
-          event.key === "Escape" &&
-          modal.classList.contains("open") &&
-          !gameActive
-        ) {
-          closeSecretTerminal();
-          return;
-        }
-
-        if (!gameActive) return;
-
-        const keys = {
-          ArrowUp: "up",
-          ArrowDown: "down",
-          ArrowLeft: "left",
-          ArrowRight: "right"
-        };
-
-        const directionName =
-          keys[event.key];
-
-        if (!directionName) return;
-
-        event.preventDefault();
-
-        setSnakeDirection(
-          directionName
-        );
-      }
+    commentsBox.classList.add(
+      "closed"
     );
 
-    /* =========================
-       COMMAND SYSTEM
-    ========================= */
-
-    function executeCommand(rawCommand) {
-      const command =
-        rawCommand.trim().toLowerCase();
-
-      if (!command) return;
-
-      addLine(
-        `$ ${rawCommand}`,
-        "echo"
-      );
-
-      switch (command) {
-
-        case "help":
-          addLine(
-            "available commands: help, music, short, snake, clear",
-            "ok"
-          );
-          break;
-
-        case "clear":
-          log.replaceChildren();
-          break;
-
-        case "snake":
-          startSnake();
-          break;
-
-        case "music":
-        case "short": {
-          const selected =
-            COMMANDS[command];
-
-          addLine(
-            selected.message,
-            "ok"
-          );
-
-          window.open(
-            selected.url,
-            "_blank",
-            "noopener,noreferrer"
-          );
-
-          break;
-        }
-
-        default:
-          addLine(
-            `command not found: ${rawCommand}`,
-            "err"
-          );
-      }
-
-      input.value = "";
-    }
-
-    input.addEventListener(
-      "keydown",
-      event => {
-        if (event.key !== "Enter") return;
-
-        executeCommand(
-          input.value
-        );
-      }
+    commentsToggle.classList.add(
+      "closed"
     );
 
-    /* =========================
-       INITIAL STATE
-    ========================= */
+    setTimeout(
+      typeBootCommand,
+      500
+    );
 
-    modal.style.display = "none";
-    commentsBox.classList.add("closed");
-    commentsToggle.classList.add("closed");
-  </script>
+  }
+);
+
+</script>
 
 </body>
 </html>
