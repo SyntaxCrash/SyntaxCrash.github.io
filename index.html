@@ -745,6 +745,29 @@ footer .tag {
 }
 
 /* =====================================================
+   EXFIL ANIMATION
+===================================================== */
+
+.exfil-line {
+  opacity: 0;
+
+  animation:
+    exfilAppear .25s ease forwards;
+}
+
+@keyframes exfilAppear {
+  from {
+    opacity: 0;
+    transform: translateX(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* =====================================================
    SNAKE
 ===================================================== */
 
@@ -1296,6 +1319,11 @@ const COMMANDS = {
   short: {
     url: "https://www.tiktok.com/@shn_322",
     message: "Opening TikTok..."
+  },
+
+  exfil: {
+    url: "https://x.com/AmaiRoot",
+    message: "Initializing secure channel..."
   }
 
 };
@@ -1536,6 +1564,86 @@ function addLine(text,type="") {
 
   log.scrollTop =
     log.scrollHeight;
+
+}
+
+
+/* =====================================================
+   EXFIL COMMAND
+===================================================== */
+
+function runExfil() {
+
+  input.disabled = true;
+
+  const sequence = [
+
+    {
+      text: "[+] initializing secure channel...",
+      delay: 0
+    },
+
+    {
+      text: "[+] resolving target: AmaiRoot",
+      delay: 500
+    },
+
+    {
+      text: "[+] encrypting connection...",
+      delay: 1000
+    },
+
+    {
+      text: "[+] connection established",
+      delay: 1500
+    },
+
+    {
+      text: "[+] redirecting to @AmaiRoot...",
+      delay: 2000
+    }
+
+  ];
+
+
+  sequence.forEach(step => {
+
+    setTimeout(() => {
+
+      const line =
+        document.createElement("div");
+
+      line.className =
+        "line ok exfil-line";
+
+      line.textContent =
+        step.text;
+
+      log.appendChild(line);
+
+      log.scrollTop =
+        log.scrollHeight;
+
+    },step.delay);
+
+  });
+
+
+  setTimeout(() => {
+
+    window.open(
+      "https://x.com/AmaiRoot",
+      "_blank",
+      "noopener,noreferrer"
+    );
+
+    input.disabled = false;
+
+    input.value = "";
+
+    input.focus();
+
+  },2600);
 
 }
 
@@ -2005,7 +2113,7 @@ input.addEventListener(
     if(command === "help") {
 
       addLine(
-        "available commands: help, music, short, snake, clear",
+        "available commands: help, music, short, exfil, snake, clear",
         "ok"
       );
 
@@ -2020,6 +2128,12 @@ input.addEventListener(
     else if(command === "snake") {
 
       startSnake();
+
+    }
+
+    else if(command === "exfil") {
+
+      runExfil();
 
     }
 
